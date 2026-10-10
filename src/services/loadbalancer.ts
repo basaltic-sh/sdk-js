@@ -108,6 +108,10 @@ export type CreateListenerRequestInput = {
 export type CreateListenerCertificateInput = { certificate: string };
 export type TagsInput = { [key: string]: string };
 export type CreateLoadBalancerRequestInput = {
+  desired_count?: number;
+  min_count?: number;
+  max_count?: number;
+  autoscaling?: AutoscalingPolicyInput;
   name: string;
   type: "application" | "network";
   vpc: string;
@@ -119,8 +123,36 @@ export type CreateLoadBalancerRequestInput = {
   security_groups: string[];
   tags?: TagsInput;
 };
+export type AutoscalingPolicyInput = {
+  enabled: boolean;
+  metrics: ScalingMetricInput[];
+  warmup_seconds?: number;
+  cooldown_seconds?: number;
+  scale_down_stabilization_seconds?: number;
+  max_scale_out_step?: number;
+  max_scale_in_step?: number;
+  drain_seconds?: number;
+};
+export type ScalingMetricInput = {
+  source: "cpu" | "telemetry";
+  target_type: "utilization" | "average_value";
+  target_value: number;
+  name?: string;
+  labels?: { [key: string]: string };
+  sample_aggregation?: "last" | "avg" | "max" | "rate";
+  series_aggregation?: "sum" | "avg" | "max";
+  expected_series?: number;
+  window_seconds?: number;
+  max_age_seconds?: number;
+};
 export type LoadBalancerResponse = { load_balancer?: LoadBalancer };
 export type LoadBalancer = {
+  rollout_surge?: boolean;
+  desired_count: number;
+  min_count: number;
+  max_count: number;
+  autoscaling?: AutoscalingPolicy;
+  autoscaling_status?: AutoscalingStatus;
   id: string;
   crn: string;
   account_id: string;
@@ -140,6 +172,45 @@ export type LoadBalancer = {
   tags: Tags;
   created_at: string;
   updated_at: string;
+};
+export type AutoscalingPolicy = {
+  enabled: boolean;
+  metrics: ScalingMetric[];
+  warmup_seconds?: number;
+  cooldown_seconds?: number;
+  scale_down_stabilization_seconds?: number;
+  max_scale_out_step?: number;
+  max_scale_in_step?: number;
+  drain_seconds?: number;
+};
+export type ScalingMetric = {
+  source: "cpu" | "telemetry";
+  target_type: "utilization" | "average_value";
+  target_value: number;
+  name?: string;
+  labels?: { [key: string]: string };
+  sample_aggregation?: "last" | "avg" | "max" | "rate";
+  series_aggregation?: "sum" | "avg" | "max";
+  expected_series?: number;
+  window_seconds?: number;
+  max_age_seconds?: number;
+};
+export type AutoscalingStatus = {
+  status:
+    | "pending"
+    | "disabled"
+    | "stable"
+    | "scaling"
+    | "waiting"
+    | "warming_up"
+    | "metrics_unavailable"
+    | "stabilizing"
+    | "cooldown"
+    | "draining";
+  reason: string;
+  evaluated_at?: string;
+  last_scaled_at?: string;
+  history: { at: string; from: number; to: number; reason: string }[];
 };
 export type Fault = {
   code: string;
@@ -312,14 +383,21 @@ export type SessionAffinity = {
 export type ListenerListResponse = { listeners?: Listener[] };
 export type LoadBalancerReplicasResponse = { replicas?: LoadBalancerReplica[] };
 export type LoadBalancerReplica = {
+  retirement?: Retirement;
   instance_id: string;
   replica_index: number;
   created_at: string;
   flavor_id: string;
-  status: "initializing" | "healthy" | "unhealthy";
+  status: "initializing" | "healthy" | "unhealthy" | "draining";
   proxy_ok: boolean;
   agent_version?: string;
   last_seen?: string;
+};
+export type Retirement = {
+  requested_at: string;
+  drain_seconds: number;
+  agent_acknowledged_at?: string;
+  drain_until?: string;
 };
 export type LoadBalancerListResponse = {
   load_balancers?: LoadBalancer[];
@@ -345,6 +423,10 @@ export type UpdateListenerRequestInput = {
   tags?: TagsInput;
 };
 export type UpdateLoadBalancerRequestInput = {
+  desired_count?: number;
+  min_count?: number;
+  max_count?: number;
+  autoscaling?: AutoscalingPolicyInput;
   replica_count?: number;
   flavor?: string;
   tags?: TagsInput;

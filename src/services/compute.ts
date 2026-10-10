@@ -384,6 +384,9 @@ export type Flavor = {
   ram_mb?: number;
   class?: "shared" | "dedicated";
   family?: "general" | "loadbalancer" | "database";
+  net_mbps?: number;
+  cpu_baseline_pct?: number;
+  cpu_burst_pct?: number;
   status?: "active" | "disabled";
   created_at?: string;
   updated_at?: string;
@@ -405,6 +408,7 @@ export type CurrentState =
   | "paused"
   | "suspended";
 export type InstancePoolCreateRequestInput = {
+  autoscaling?: AutoscalingPolicyInput;
   name: string;
   description?: string;
   tags?: TagsInput;
@@ -412,6 +416,28 @@ export type InstancePoolCreateRequestInput = {
   desired_count?: number;
   min_count?: number;
   max_count?: number;
+};
+export type AutoscalingPolicyInput = {
+  enabled: boolean;
+  metrics: ScalingMetricInput[];
+  warmup_seconds?: number;
+  cooldown_seconds?: number;
+  scale_down_stabilization_seconds?: number;
+  max_scale_out_step?: number;
+  max_scale_in_step?: number;
+  drain_seconds?: number;
+};
+export type ScalingMetricInput = {
+  source: "cpu" | "telemetry";
+  target_type: "utilization" | "average_value";
+  target_value: number;
+  name?: string;
+  labels?: { [key: string]: string };
+  sample_aggregation?: "last" | "avg" | "max" | "rate";
+  series_aggregation?: "sum" | "avg" | "max";
+  expected_series?: number;
+  window_seconds?: number;
+  max_age_seconds?: number;
 };
 export type InstancePoolTemplateRequestInput = {
   flavor: string;
@@ -428,12 +454,17 @@ export type InstanceVolumeInput = {
   boot?: boolean;
   size_gb: number;
   volume_type?: string;
+  performance?: VolumePerformanceRequestInput;
   mount_path?: string;
   fstype?: string;
   delete_on_termination?: boolean;
 };
 export type InstancePoolResponse = { instance_pool?: InstancePool };
 export type InstancePool = {
+  autoscaling?: AutoscalingPolicy;
+  autoscaling_status?: AutoscalingStatus;
+  rollout_surge?: boolean;
+  retiring_instances?: RetiringPoolMember[];
   id?: string;
   crn?: string;
   name?: string;
@@ -450,6 +481,52 @@ export type InstancePool = {
   managed_by?: string;
   tags?: Tags;
   template?: InstancePoolTemplate;
+};
+export type AutoscalingPolicy = {
+  enabled: boolean;
+  metrics: ScalingMetric[];
+  warmup_seconds?: number;
+  cooldown_seconds?: number;
+  scale_down_stabilization_seconds?: number;
+  max_scale_out_step?: number;
+  max_scale_in_step?: number;
+  drain_seconds?: number;
+};
+export type ScalingMetric = {
+  source: "cpu" | "telemetry";
+  target_type: "utilization" | "average_value";
+  target_value: number;
+  name?: string;
+  labels?: { [key: string]: string };
+  sample_aggregation?: "last" | "avg" | "max" | "rate";
+  series_aggregation?: "sum" | "avg" | "max";
+  expected_series?: number;
+  window_seconds?: number;
+  max_age_seconds?: number;
+};
+export type AutoscalingStatus = {
+  status:
+    | "pending"
+    | "disabled"
+    | "stable"
+    | "scaling"
+    | "waiting"
+    | "warming_up"
+    | "metrics_unavailable"
+    | "stabilizing"
+    | "cooldown"
+    | "draining";
+  reason: string;
+  evaluated_at?: string;
+  last_scaled_at?: string;
+  history: { at: string; from: number; to: number; reason: string }[];
+};
+export type RetiringPoolMember = Retirement & { instance_id: string };
+export type Retirement = {
+  requested_at: string;
+  drain_seconds: number;
+  agent_acknowledged_at?: string;
+  drain_until?: string;
 };
 export type InstancePoolTemplate = {
   flavor_id?: string;
@@ -504,9 +581,14 @@ export type InstanceVolume = {
   boot?: boolean;
   size_gb: number;
   volume_type?: string;
+  performance?: VolumePerformanceRequest;
   mount_path?: string;
   fstype?: string;
   delete_on_termination?: boolean;
+};
+export type VolumePerformanceRequest = {
+  iops?: number;
+  throughput_mib_s?: number;
 };
 export type SerialConsoleTicket = {
   ticket: string;
@@ -602,6 +684,7 @@ export type InstanceUpdateRequestInput = {
   tags?: TagsInput;
 };
 export type InstancePoolUpdateRequestInput = {
+  autoscaling?: AutoscalingPolicyInput;
   description?: string;
   tags?: TagsInput;
   desired_count?: number;
