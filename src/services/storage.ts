@@ -163,12 +163,21 @@ export type Snapshot = {
   description?: string;
   tags?: Tags;
   size_gb?: number;
+  logical_size_bytes?: number;
+  snapshot_usage?: SnapshotUsage;
   status?: SnapshotStatus;
   faults: Fault[];
   created_at?: string;
   updated_at?: string;
 };
 export type Tags = { [key: string]: string };
+export type SnapshotUsage = {
+  state: "unknown" | "stale" | "measured";
+  scope: "volume_lineage";
+  billable: false;
+  measured_at: string | null;
+  lineage_retained_bytes: number | null;
+};
 export type SnapshotStatus = "creating" | "available" | "deleting" | "error";
 export type Fault = {
   code: string;

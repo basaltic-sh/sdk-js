@@ -1,6 +1,6 @@
 {
   "name": "@basaltic-sh/sdk-js",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Official TypeScript and JavaScript SDK for the Basaltic cloud platform",
   "type": "module",
   "license": "Apache-2.0",
