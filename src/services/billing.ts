@@ -46,27 +46,32 @@ export type ListTransactionsQuery = {
 };
 export type ListTransactionsResponse = TransactionListResponse;
 export type ListTransactionsItem = Transaction;
-export type UpdateBillingProfileBody = BillingProfileInput;
+export type UpdateBillingProfileBody = BillingProfileUpdateInput;
 export type UpdateBillingProfileResponse = BillingProfile;
 export type BillingProfile = {
-  customer_type?: "" | "individual" | "company";
-  company_name?: string;
-  country?: string;
-  tax_id?: string;
-  foreign_tax_id?: string;
-  no_tax_id_reason?: string;
-  email?: string;
-  phone?: string;
+  customer_type: "" | "individual" | "company";
+  company_name: string;
+  tax_id: string;
+  tax_id_kind: string;
+  no_tax_id_reason: string;
+  email: string;
+  phone: string;
+  country: ResourceRef;
+  state: ResourceRef | null;
+  city: ResourceRef | null;
+  address: BillingAddress;
+  ready: boolean;
+  missing_fields: string[];
+};
+export type ResourceRef = { id: string; crn: string; name?: string };
+export type BillingAddress = {
   street_name?: string;
   street_number?: string;
   complement?: string;
   neighborhood?: string;
   city?: string;
-  municipality_code?: string;
   state?: string;
   postal_code?: string;
-  ready?: boolean;
-  missing_fields?: string[];
 };
 export type CurrentUsage = {
   amount: string;
@@ -197,21 +202,25 @@ export type Transaction = {
   reference?: string | null;
   created_at: string;
 };
-export type BillingProfileInput = {
+export type BillingProfileUpdateInput = {
   customer_type?: "" | "individual" | "company";
   company_name?: string;
-  country?: string;
   tax_id?: string;
-  foreign_tax_id?: string;
+  tax_id_kind?: string;
   no_tax_id_reason?: string;
   email?: string;
   phone?: string;
+  country?: string;
+  state?: string;
+  city?: string;
+  address?: BillingAddressInput;
+};
+export type BillingAddressInput = {
   street_name?: string;
   street_number?: string;
   complement?: string;
   neighborhood?: string;
   city?: string;
-  municipality_code?: string;
   state?: string;
   postal_code?: string;
 };

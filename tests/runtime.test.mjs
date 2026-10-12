@@ -485,3 +485,38 @@ test("serial console prepares authenticated WebSocket metadata without opening a
   );
   assert.equal(ws.headers.get("Authorization"), "Bearer token");
 });
+
+test("KMS rotation preserves disabled policies, durable tokens, and signature versions", async () => {
+  const calls = [];
+  const c = client(async (url, init) => {
+    calls.push({ url, ...init });
+    return json(
+      { rotation: { id: "rotation", status: "pending", key_version: null } },
+      202,
+    );
+  });
+  await c.kms.setKeyRotation("key", {
+    enabled: false,
+    rotation_period_days: 90,
+  });
+  assert.equal(calls[0].method, "PUT");
+  assert.deepEqual(JSON.parse(calls[0].body), {
+    enabled: false,
+    rotation_period_days: 90,
+  });
+  const result = await c.kms.rotateKeyOnDemand("key", {
+    idempotencyKey: "rotation-request",
+  });
+  assert.equal(result.statusCode, 202);
+  assert.equal(result.data.rotation.key_version, null);
+  assert.equal(calls[1].headers.get("Idempotency-Key"), "rotation-request");
+  assert.ok(calls[1].url.endsWith("/v1/keys/key/rotate"));
+  await c.kms.verify("key", {
+    message: "bXNn",
+    signature: "c2ln",
+    key_version: 1,
+  });
+  assert.equal(JSON.parse(calls[2].body).key_version, 1);
+  await c.kms.getPublicKey("key", { key_version: 1 });
+  assert.ok(calls[3].url.endsWith("/public-key?key_version=1"));
+});

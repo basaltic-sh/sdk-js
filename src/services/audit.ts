@@ -35,9 +35,23 @@ export type AuditLog = {
   ip_address?: string | null;
   user_agent?: string | null;
   request_id?: string | null;
-  details?: { [key: string]: unknown };
+  details?: { auth_chain?: AuditAuthenticationStep[]; [key: string]: unknown };
   error_code?: string | null;
   error_message?: string | null;
+};
+export type AuditAuthenticationStep = {
+  principal_id: string;
+  principal_type: string;
+  principal_crn?: string;
+  name?: string;
+  issuer?: string;
+  subject?: string;
+  email?: string;
+  session_id?: string;
+  session_crn?: string;
+  session_name?: string;
+  grant_type?: string;
+  issued_at?: string;
 };
 export type AuditLogListResponse = {
   audit_logs?: AuditLog[];

@@ -145,6 +145,16 @@ Save organization billing details
 updateBillingProfile(body: UpdateBillingProfileBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateBillingProfileResponse>>
 ```
 
+## `catalog.getCountry`
+
+Get a country and its address rules
+
+`GET /v1/countries/{country}`
+
+```ts
+getCountry(country: string, options: RequestOptions = {}): Promise<ApiResponse<GetCountryResponse>>
+```
+
 ## `catalog.getRegion`
 
 Get a region
@@ -155,6 +165,26 @@ Get a region
 getRegion(code: string, options: RequestOptions = {}): Promise<ApiResponse<GetRegionResponse>>
 ```
 
+## `catalog.listCities`
+
+List cities
+
+`GET /v1/cities`
+
+```ts
+listCities(query: ListCitiesQuery = {}, options: RequestOptions = {}): Promise<Page<ListCitiesResponse, ListCitiesItem>>
+```
+
+## `catalog.listCountries`
+
+List countries
+
+`GET /v1/countries`
+
+```ts
+listCountries(options: RequestOptions = {}): Promise<Page<ListCountriesResponse, ListCountriesItem>>
+```
+
 ## `catalog.listRegions`
 
 List regions
@@ -163,6 +193,26 @@ List regions
 
 ```ts
 listRegions(query: ListRegionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListRegionsResponse, ListRegionsItem>>
+```
+
+## `catalog.listStates`
+
+List a country's states
+
+`GET /v1/states`
+
+```ts
+listStates(query: ListStatesQuery, options: RequestOptions = {}): Promise<Page<ListStatesResponse, ListStatesItem>>
+```
+
+## `catalog.lookupPostalCode`
+
+Look up a postal code
+
+`GET /v1/postal-codes/{code}`
+
+```ts
+lookupPostalCode(code: string, query: LookupPostalCodeQuery, options: RequestOptions = {}): Promise<ApiResponse<LookupPostalCodeResponse>>
 ```
 
 ## `certificate.createCertificate`
@@ -1445,6 +1495,46 @@ Get a KMS key
 getKey(key_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetKeyResponse>>
 ```
 
+## `kms.getKeyRotation`
+
+Get a key rotation
+
+`GET /v1/keys/{key_id}/rotations/{rotation_id}`
+
+```ts
+getKeyRotation(key_id: string, rotation_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetKeyRotationResponse>>
+```
+
+## `kms.getKeyRotationStatus`
+
+Get key rotation status
+
+`GET /v1/keys/{key_id}/rotation`
+
+```ts
+getKeyRotationStatus(key_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetKeyRotationStatusResponse>>
+```
+
+## `kms.getPublicKey`
+
+Get a versioned public key
+
+`GET /v1/keys/{key_id}/public-key`
+
+```ts
+getPublicKey(key_id: string, query: GetPublicKeyQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<GetPublicKeyResponse>>
+```
+
+## `kms.listKeyRotations`
+
+List key rotation history
+
+`GET /v1/keys/{key_id}/rotations`
+
+```ts
+listKeyRotations(key_id: string, query: ListKeyRotationsQuery = {}, options: RequestOptions = {}): Promise<Page<ListKeyRotationsResponse, ListKeyRotationsItem>>
+```
+
 ## `kms.listKeys`
 
 List KMS keys
@@ -1455,6 +1545,26 @@ List KMS keys
 listKeys(query: ListKeysQuery = {}, options: RequestOptions = {}): Promise<Page<ListKeysResponse, ListKeysItem>>
 ```
 
+## `kms.rewrap`
+
+Rewrap ciphertext with current key material
+
+`POST /v1/keys/{key_id}/rewrap`
+
+```ts
+rewrap(key_id: string, body: RewrapBody, options: RequestOptions = {}): Promise<ApiResponse<RewrapResponse>>
+```
+
+## `kms.rotateKeyOnDemand`
+
+Rotate key material now
+
+`POST /v1/keys/{key_id}/rotate`
+
+```ts
+rotateKeyOnDemand(key_id: string, options: RequestOptions = {}): Promise<ApiResponse<RotateKeyOnDemandResponse>>
+```
+
 ## `kms.scheduleKeyDeletion`
 
 Schedule key for deletion
@@ -1463,6 +1573,16 @@ Schedule key for deletion
 
 ```ts
 scheduleKeyDeletion(key_id: string, body: ScheduleKeyDeletionBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<ScheduleKeyDeletionResponse>>
+```
+
+## `kms.setKeyRotation`
+
+Configure automatic key rotation
+
+`PUT /v1/keys/{key_id}/rotation`
+
+```ts
+setKeyRotation(key_id: string, body: SetKeyRotationBody, options: RequestOptions = {}): Promise<ApiResponse<SetKeyRotationResponse>>
 ```
 
 ## `kms.sign`

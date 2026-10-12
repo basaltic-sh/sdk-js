@@ -15,6 +15,13 @@ export type EncryptResponse = EncryptResponse2;
 export type GenerateDataKeyBody = GenerateDataKeyRequestInput;
 export type GenerateDataKeyResponse = GenerateDataKeyResponse2;
 export type GetKeyResponse = KeyResponse;
+export type GetKeyRotationResponse = KeyRotationResponse;
+export type GetKeyRotationStatusResponse = KeyRotationStatusResponse;
+export type GetPublicKeyQuery = { key_version?: number };
+export type GetPublicKeyResponse = PublicKeyResponse;
+export type ListKeyRotationsQuery = { limit?: number; marker?: string };
+export type ListKeyRotationsResponse = KeyRotationListResponse;
+export type ListKeyRotationsItem = KeyRotation;
 export type ListKeysQuery = {
   limit?: number;
   marker?: string;
@@ -24,8 +31,13 @@ export type ListKeysQuery = {
 };
 export type ListKeysResponse = KeyListResponse;
 export type ListKeysItem = Key;
+export type RewrapBody = RewrapRequestInput;
+export type RewrapResponse = EncryptResponse2;
+export type RotateKeyOnDemandResponse = KeyRotationResponse;
 export type ScheduleKeyDeletionBody = ScheduleKeyDeletionRequestInput;
 export type ScheduleKeyDeletionResponse = KeyResponse;
+export type SetKeyRotationBody = SetKeyRotationRequestInput;
+export type SetKeyRotationResponse = KeyRotationPolicyResponse;
 export type SignBody = SignRequestInput;
 export type SignResponse = SignResponse2;
 export type UpdateKeyBody = UpdateKeyRequestInput;
@@ -72,15 +84,57 @@ export type GenerateDataKeyResponse2 = {
   plaintext?: string;
   ciphertext?: string;
 };
-export type KeyStateInput = "enabled" | "disabled" | "pending_deletion";
-export type KeyListResponse = { keys?: Key[]; meta?: PaginationMeta };
+export type KeyRotationResponse = { rotation: KeyRotation };
+export type KeyRotation = {
+  id: string;
+  key_id: string;
+  trigger: "on_demand" | "automatic";
+  status:
+    | "pending"
+    | "in_progress"
+    | "reconciliation_required"
+    | "succeeded"
+    | "failed";
+  previous_version: number | null;
+  key_version: number | null;
+  requested_at: string;
+  started_at: string | null;
+  completed_at: string | null;
+  error_code: string | null;
+};
+export type KeyRotationStatusResponse = { rotation: KeyRotationStatus };
+export type KeyRotationStatus = KeyRotationPolicy & { current_version: number };
+export type KeyRotationPolicy = {
+  enabled: boolean;
+  rotation_period_days: number;
+  next_rotation_at: string | null;
+};
+export type PublicKeyResponse = {
+  key_crn: string;
+  key_version: number;
+  key_spec: KeySpec;
+  key_usage: KeyUsage;
+  public_key: string;
+};
+export type KeyRotationListResponse = {
+  rotations: KeyRotation[];
+  meta: PaginationMeta;
+};
 export type PaginationMeta = {
   total?: number;
   limit?: number;
   marker?: string;
   has_more?: boolean;
 };
+export type KeyStateInput = "enabled" | "disabled" | "pending_deletion";
+export type KeyListResponse = { keys?: Key[]; meta?: PaginationMeta };
+export type RewrapRequestInput = { ciphertext: string };
 export type ScheduleKeyDeletionRequestInput = { recovery_window_days?: number };
+export type SetKeyRotationRequestInput = {
+  enabled: boolean;
+  rotation_period_days?: number;
+};
+export type KeyRotationPolicyResponse = { rotation: KeyRotationPolicy };
 export type SignRequestInput = {
   message: string;
   signing_algorithm?: SigningAlgorithmInput;
@@ -88,6 +142,7 @@ export type SignRequestInput = {
 export type SigningAlgorithmInput =
   "RSASSA_PSS_SHA_256" | "RSASSA_PKCS1_V1_5_SHA_256" | "ECDSA_SHA_256";
 export type SignResponse2 = {
+  key_version?: number;
   signature?: string;
   signing_algorithm?: SigningAlgorithm;
 };
@@ -95,6 +150,7 @@ export type SigningAlgorithm =
   "RSASSA_PSS_SHA_256" | "RSASSA_PKCS1_V1_5_SHA_256" | "ECDSA_SHA_256";
 export type UpdateKeyRequestInput = { description?: string; tags?: TagsInput };
 export type VerifyRequestInput = {
+  key_version?: number;
   message: string;
   signature: string;
   signing_algorithm?: SigningAlgorithmInput;
@@ -197,6 +253,58 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
+  getKeyRotation: {
+    id: "getKeyRotation",
+    method: "GET",
+    path: "/v1/keys/{key_id}/rotations/{rotation_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  getKeyRotationStatus: {
+    id: "getKeyRotationStatus",
+    method: "GET",
+    path: "/v1/keys/{key_id}/rotation",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  getPublicKey: {
+    id: "getPublicKey",
+    method: "GET",
+    path: "/v1/keys/{key_id}/public-key",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: { key_version: { style: "form", explode: true } },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  listKeyRotations: {
+    id: "listKeyRotations",
+    method: "GET",
+    path: "/v1/keys/{key_id}/rotations",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+    },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "rotations",
+  },
   listKeys: {
     id: "listKeys",
     method: "GET",
@@ -216,6 +324,30 @@ const operations = {
     accept: "application/json",
     itemsKey: "keys",
   },
+  rewrap: {
+    id: "rewrap",
+    method: "POST",
+    path: "/v1/keys/{key_id}/rewrap",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  rotateKeyOnDemand: {
+    id: "rotateKeyOnDemand",
+    method: "POST",
+    path: "/v1/keys/{key_id}/rotate",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
   scheduleKeyDeletion: {
     id: "scheduleKeyDeletion",
     method: "POST",
@@ -225,6 +357,18 @@ const operations = {
     requiredHeaders: [],
     queryEncoding: {},
     bodyRequired: false,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  setKeyRotation: {
+    id: "setKeyRotation",
+    method: "PUT",
+    path: "/v1/keys/{key_id}/rotation",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
     contentType: "application/json",
     accept: "application/json",
   },
@@ -407,6 +551,79 @@ export class KmsService {
       "key",
     );
   }
+  /** Get a key rotation */
+  getKeyRotation(
+    key_id: string,
+    rotation_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetKeyRotationResponse>> {
+    return this.transport.json<GetKeyRotationResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.getKeyRotation,
+      { key_id, rotation_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  /** Get key rotation status */
+  getKeyRotationStatus(
+    key_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetKeyRotationStatusResponse>> {
+    return this.transport.json<GetKeyRotationStatusResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.getKeyRotationStatus,
+      { key_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  /** Get a versioned public key */
+  getPublicKey(
+    key_id: string,
+    query: GetPublicKeyQuery = {},
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetPublicKeyResponse>> {
+    return this.transport.json<GetPublicKeyResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.getPublicKey,
+      { key_id },
+      undefined,
+      query,
+      options,
+    );
+  }
+  /** List key rotation history */
+  listKeyRotations(
+    key_id: string,
+    query: ListKeyRotationsQuery = {},
+    options: RequestOptions = {},
+  ): Promise<Page<ListKeyRotationsResponse, ListKeyRotationsItem>> {
+    return this.transport.page<ListKeyRotationsResponse, ListKeyRotationsItem>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.listKeyRotations,
+      { key_id },
+      undefined,
+      query,
+      options,
+    );
+  }
+  listKeyRotationsAll(
+    key_id: string,
+    query: ListKeyRotationsQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListKeyRotationsItem> {
+    return iteratePages(
+      (marker) => this.listKeyRotations(key_id, { ...query, marker }, options),
+      query.marker ?? "",
+    );
+  }
   /** List KMS keys */
   listKeys(
     query: ListKeysQuery = {},
@@ -431,6 +648,37 @@ export class KmsService {
       query.marker ?? "",
     );
   }
+  /** Rewrap ciphertext with current key material */
+  rewrap(
+    key_id: string,
+    body: RewrapBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<RewrapResponse>> {
+    return this.transport.json<RewrapResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.rewrap,
+      { key_id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Rotate key material now */
+  rotateKeyOnDemand(
+    key_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<RotateKeyOnDemandResponse>> {
+    return this.transport.json<RotateKeyOnDemandResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.rotateKeyOnDemand,
+      { key_id },
+      undefined,
+      {},
+      options,
+    );
+  }
   /** Schedule key for deletion */
   scheduleKeyDeletion(
     key_id: string,
@@ -441,6 +689,22 @@ export class KmsService {
       "kms",
       "https://kms.{region}.basaltic.sh",
       operations.scheduleKeyDeletion,
+      { key_id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Configure automatic key rotation */
+  setKeyRotation(
+    key_id: string,
+    body: SetKeyRotationBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<SetKeyRotationResponse>> {
+    return this.transport.json<SetKeyRotationResponse>(
+      "kms",
+      "https://kms.{region}.basaltic.sh",
+      operations.setKeyRotation,
       { key_id },
       body,
       {},
