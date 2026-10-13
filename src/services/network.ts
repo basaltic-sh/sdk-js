@@ -4,9 +4,10 @@ import type { RequestOptions } from "../config.js";
 import type { ApiResponse, Page } from "../response.js";
 import { iteratePages, referenceScope, resolveReference } from "../response.js";
 export type AttachFloatingIpBody = { interface: string; address_id: string };
-export type AttachFloatingIpResponse = { floating_ip?: FloatingIp };
-export type AttachInternetGatewayBody = InternetGatewayAttachRequestInput;
-export type AttachInternetGatewayResponse = InternetGatewayResponse;
+export type AttachFloatingIpResponse = FloatingIpInterfaceResponse;
+export type AttachInterfaceSecurityGroupBody =
+  InterfaceSecurityGroupRequestInput;
+export type AttachInterfaceSecurityGroupResponse = SecurityGroupResponse;
 export type CreateEgressOnlyGatewayBody = EgressOnlyGatewayCreateRequestInput;
 export type CreateEgressOnlyGatewayResponse = EgressOnlyGatewayResponse;
 export type CreateFloatingIpBody = FloatingIpCreateRequestInput;
@@ -15,16 +16,14 @@ export type CreateInterfaceBody = InterfaceCreateRequestInput;
 export type CreateInterfaceResponse = InterfaceResponse;
 export type CreateInterfaceAddressBody = AddressRequestInput;
 export type CreateInterfaceAddressResponse = { address?: InterfaceAddress };
-export type CreateInterfacePrefixBody = { pool_id: string };
-export type CreateInterfacePrefixResponse = {
-  routed_prefixes?: RoutedPrefix[];
-};
+export type CreateInterfacePrefixBody = { pool: string };
+export type CreateInterfacePrefixResponse = { prefix: RoutedPrefix };
 export type CreateInternetGatewayBody = InternetGatewayCreateRequestInput;
 export type CreateInternetGatewayResponse = InternetGatewayResponse;
 export type CreateNATGatewayBody = NATGatewayCreateRequestInput;
 export type CreateNATGatewayResponse = NATGatewayResponse;
 export type CreatePrefixPoolBody = { cidr_ipv4: string };
-export type CreatePrefixPoolResponse = { prefix_pools?: PrefixPool[] };
+export type CreatePrefixPoolResponse = { prefix_pool: PrefixPool };
 export type CreateRouteBody = RouteCreateRequestInput;
 export type CreateRouteResponse = RouteResponse;
 export type CreateRouteTableBody = RouteTableCreateRequestInput;
@@ -37,9 +36,10 @@ export type CreateSubnetBody = SubnetCreateRequestInput;
 export type CreateSubnetResponse = SubnetResponse;
 export type CreateVpcBody = VpcCreateRequestInput;
 export type CreateVpcResponse = VpcResponse;
-export type DetachFloatingIpBody = { interface?: string };
-export type DetachFloatingIpResponse = { floating_ip?: FloatingIp };
-export type DetachInternetGatewayResponse = InternetGatewayResponse;
+export type EnableSubnetIPv6Body = SubnetIPv6RequestInput;
+export type EnableSubnetIPv6Response = SubnetResponse;
+export type EnableVPCIPv6Body = VpcIPv6RequestInput;
+export type EnableVPCIPv6Response = VpcResponse;
 export type GetEgressOnlyGatewayResponse = EgressOnlyGatewayResponse;
 export type GetFloatingIpResponse = FloatingIpResponse;
 export type GetInterfaceResponse = InterfaceResponse;
@@ -68,6 +68,14 @@ export type ListEgressOnlyGatewaysQuery = {
 };
 export type ListEgressOnlyGatewaysResponse = EgressOnlyGatewayListResponse;
 export type ListEgressOnlyGatewaysItem = EgressOnlyGateway;
+export type ListFloatingIpInterfacesQuery = {
+  limit?: number;
+  marker?: string;
+  crn?: string;
+  name?: string;
+};
+export type ListFloatingIpInterfacesResponse = FloatingIpInterfaceListResponse;
+export type ListFloatingIpInterfacesItem = FloatingIpInterface;
 export type ListFloatingIpsQuery = {
   name?: string;
   crn?: string;
@@ -80,13 +88,18 @@ export type ListFloatingIpsItem = FloatingIp;
 export type ListInterfaceAddressesResponse = { addresses?: InterfaceAddress[] };
 export type ListInterfaceAddressesItem = InterfaceAddress;
 export type ListInterfacePrefixesResponse = {
-  routed_prefixes?: RoutedPrefix[];
+  prefixes: RoutedPrefix[];
+  meta: PaginationMeta;
 };
 export type ListInterfacePrefixesItem = RoutedPrefix;
-export type ListInterfaceSecurityGroupsQuery = { name?: string; crn?: string };
-export type ListInterfaceSecurityGroupsResponse =
-  InterfaceSecurityGroupsResponse;
-export type ListInterfaceSecurityGroupsItem = string;
+export type ListInterfaceSecurityGroupsQuery = {
+  name?: string;
+  crn?: string;
+  marker?: string;
+  limit?: number;
+};
+export type ListInterfaceSecurityGroupsResponse = SecurityGroupListResponse;
+export type ListInterfaceSecurityGroupsItem = SecurityGroup;
 export type ListInterfacesQuery = {
   name?: string;
   crn?: string;
@@ -131,7 +144,10 @@ export type ListNATGatewaysQuery = {
 };
 export type ListNATGatewaysResponse = NATGatewayListResponse;
 export type ListNATGatewaysItem = NATGateway;
-export type ListPrefixPoolsResponse = { prefix_pools?: PrefixPool[] };
+export type ListPrefixPoolsResponse = {
+  prefix_pools: PrefixPool[];
+  meta: PaginationMeta;
+};
 export type ListPrefixPoolsItem = PrefixPool;
 export type ListRouteTablesQuery = {
   name?: string;
@@ -183,10 +199,6 @@ export type ListVpcsQuery = {
 };
 export type ListVpcsResponse = VpcListResponse;
 export type ListVpcsItem = Vpc;
-export type SetInterfaceSecurityGroupsBody =
-  InterfaceSecurityGroupsRequestInput;
-export type SetInterfaceSecurityGroupsResponse =
-  InterfaceSecurityGroupsResponse;
 export type UpdateEgressOnlyGatewayBody = EgressOnlyGatewayUpdateRequestInput;
 export type UpdateEgressOnlyGatewayResponse = EgressOnlyGatewayResponse;
 export type UpdateFloatingIpBody = FloatingIpUpdateRequestInput;
@@ -207,52 +219,32 @@ export type UpdateSubnetBody = SubnetUpdateRequestInput;
 export type UpdateSubnetResponse = SubnetResponse;
 export type UpdateVpcBody = VpcUpdateRequestInput;
 export type UpdateVpcResponse = VpcResponse;
-export type FloatingIp = {
-  id: string;
-  crn: string;
-  description?: string;
-  family: IpFamily;
-  attached_to: string | null;
-  members: FloatingIpMember[];
-  tags: { [key: string]: string };
-  health_check?: FloatingIpHealthCheck;
-  created_at: string;
-  updated_at: string;
-  address: string;
-  visibility: "public" | "private";
-  subnet_id?: string | null;
-  vpc_id?: string;
-};
-export type IpFamily = "ipv4" | "ipv6";
-export type FloatingIpMember = {
-  interface: {
-    id: string;
-    crn: string;
-    instance: { id: string; crn: string; name: string } | null;
-  } | null;
+export type FloatingIpInterfaceResponse = { interface: FloatingIpInterface };
+export type FloatingIpInterface = Interface & {
   health: "unknown" | "healthy" | "unhealthy";
   reason: "unprobed" | "booting" | "probe_failed" | "passing";
+  address_id?: string;
+};
+export type Interface = {
+  id: string;
+  crn: string;
+  subnet: ResourceRef;
+  name: string;
+  description?: string;
+  mac: string;
+  attached_to: ResourceRef | null;
+  tags: { [key: string]: string };
   created_at: string;
-  address_id?: string | null;
+  updated_at: string;
 };
-export type FloatingIpHealthCheck = {
-  protocol: "tcp" | "http" | "https";
-  path?: string;
-  port: number;
-  interval_sec: number;
-  timeout_sec: number;
-  healthy_threshold: number;
-  unhealthy_threshold: number;
-  matcher?: string;
-};
-export type InternetGatewayAttachRequestInput = { vpc: string };
-export type InternetGatewayResponse = { internet_gateway?: InternetGateway };
-export type InternetGateway = {
+export type ResourceRef = { id: string; crn: string; name?: string };
+export type InterfaceSecurityGroupRequestInput = { security_group: string };
+export type SecurityGroupResponse = { security_group?: SecurityGroup };
+export type SecurityGroup = {
   id: string;
   crn: string;
   name: string;
   description?: string;
-  attached_vpc_id?: string | null;
   tags: { [key: string]: string };
   created_at: string;
   updated_at: string;
@@ -271,18 +263,7 @@ export type EgressOnlyGateway = {
   crn: string;
   name: string;
   description?: string;
-  vpc: Vpc;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type Vpc = {
-  id: string;
-  crn: string;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  cidr_ipv6?: string | null;
+  vpc: ResourceRef;
   tags: { [key: string]: string };
   created_at: string;
   updated_at: string;
@@ -306,7 +287,33 @@ export type FloatingIpHealthCheckInput = {
   unhealthy_threshold: number;
   matcher?: string;
 };
-export type FloatingIpResponse = { floating_ip?: FloatingIp };
+export type FloatingIpResponse = { floating_ip: FloatingIp };
+export type FloatingIp = {
+  id: string;
+  crn: string;
+  description?: string;
+  family: IpFamily;
+  attached_to: ResourceRef | null;
+  tags: { [key: string]: string };
+  health_check?: FloatingIpHealthCheck;
+  created_at: string;
+  updated_at: string;
+  address: string;
+  visibility: "public" | "private";
+  subnet: ResourceRef | null;
+  vpc: ResourceRef | null;
+};
+export type IpFamily = "ipv4" | "ipv6";
+export type FloatingIpHealthCheck = {
+  protocol: "tcp" | "http" | "https";
+  path?: string;
+  port: number;
+  interval_sec: number;
+  timeout_sec: number;
+  healthy_threshold: number;
+  unhealthy_threshold: number;
+  matcher?: string;
+};
 export type InterfaceCreateRequestInput = {
   subnet: string;
   name: string;
@@ -316,50 +323,16 @@ export type InterfaceCreateRequestInput = {
   addresses?: AddressRequestInput[];
 };
 export type AddressRequestInput = { family: "ipv4" | "ipv6"; address?: string };
-export type InterfaceResponse = { interface?: Interface };
-export type Interface = {
-  id: string;
-  crn: string;
-  subnet: Subnet;
-  name: string;
-  description?: string;
-  mac: string;
-  attached_to?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-  addresses: InterfaceAddress[];
-  routed_prefixes: RoutedPrefix[];
-};
-export type Subnet = {
-  id: string;
-  crn: string;
-  vpc: Vpc;
-  route_table: RouteTableSummary;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  gateway_ipv4: string;
-  cidr_ipv6?: string | null;
-  gateway_ipv6?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type RouteTableSummary = {
-  id: string;
-  crn: string;
-  name: string;
-} | null;
+export type InterfaceResponse = { interface: Interface };
 export type InterfaceAddress = {
   id: string;
   family: "ipv4" | "ipv6";
   address: string;
   prefix: string;
   primary: boolean;
-  floating_ips: AddressFloatingIp[];
+  floating_ips: FloatingIPRef[];
 };
-export type AddressFloatingIp = {
+export type FloatingIPRef = {
   id: string;
   crn: string;
   visibility: "public" | "private";
@@ -367,14 +340,26 @@ export type AddressFloatingIp = {
 };
 export type RoutedPrefix = {
   id: string;
-  pool_id: string;
+  pool: ResourceRef;
   family: "ipv4";
   prefix: string;
 };
 export type InternetGatewayCreateRequestInput = {
+  vpc: string;
   name: string;
   description?: string;
   tags?: { [key: string]: string };
+};
+export type InternetGatewayResponse = { internet_gateway: InternetGateway };
+export type InternetGateway = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  attached_vpc?: ResourceRef | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
 };
 export type NATGatewayCreateRequestInput = {
   name: string;
@@ -388,14 +373,14 @@ export type NATGateway = {
   crn: string;
   name: string;
   description?: string;
-  subnet: Subnet;
+  subnet: ResourceRef;
   public_ipv4: string;
   public_ipv6?: string;
   tags: { [key: string]: string };
   created_at: string;
   updated_at: string;
 };
-export type PrefixPool = { id: string; cidr_ipv4: string };
+export type PrefixPool = { crn: string; id: string; cidr_ipv4: string };
 export type RouteCreateRequestInput = {
   description?: string;
   destination_cidr: string;
@@ -409,14 +394,13 @@ export type RouteResponse = { route?: Route };
 export type Route = {
   id: string;
   crn: string;
-  route_table_id: string;
   description?: string;
   destination_cidr: string;
   target_type: RouteTargetType;
   next_hop_ip?: string | null;
-  target_internet_gateway_id?: string | null;
-  target_nat_gateway_id?: string | null;
-  target_egress_only_gateway_id?: string | null;
+  target_internet_gateway?: ResourceRef;
+  target_nat_gateway?: ResourceRef;
+  target_egress_only_gateway?: ResourceRef;
   tags: { [key: string]: string };
   created_at: string;
   updated_at: string;
@@ -433,7 +417,7 @@ export type RouteTableResponse = { route_table?: RouteTable };
 export type RouteTable = {
   id: string;
   crn: string;
-  vpc: Vpc;
+  vpc: ResourceRef;
   name: string;
   description?: string;
   is_main: boolean;
@@ -445,16 +429,6 @@ export type SecurityGroupCreateRequestInput = {
   name: string;
   description?: string;
   tags?: { [key: string]: string };
-};
-export type SecurityGroupResponse = { security_group?: SecurityGroup };
-export type SecurityGroup = {
-  id: string;
-  crn: string;
-  name: string;
-  description?: string;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
 };
 export type SecurityGroupRuleCreateRequestInput = {
   description?: string;
@@ -472,7 +446,6 @@ export type SecurityGroupRuleProtocolInput = "tcp" | "udp" | "icmp" | "all";
 export type SecurityGroupRuleResponse = { rule?: SecurityGroupRule };
 export type SecurityGroupRule = {
   id: string;
-  security_group_id: string;
   description?: string;
   direction: SecurityGroupRuleDirection;
   ethertype: SecurityGroupRuleEthertype;
@@ -480,7 +453,7 @@ export type SecurityGroupRule = {
   port_min?: number | null;
   port_max?: number | null;
   remote_cidr?: string | null;
-  source_security_group_id?: string | null;
+  source_security_group?: ResourceRef;
   created_at: string;
 };
 export type SecurityGroupRuleDirection = "ingress" | "egress";
@@ -497,7 +470,22 @@ export type SubnetCreateRequestInput = {
   cidr_ipv6?: string | null;
   tags?: { [key: string]: string };
 };
-export type SubnetResponse = { subnet?: Subnet };
+export type SubnetResponse = { subnet: Subnet };
+export type Subnet = {
+  id: string;
+  crn: string;
+  vpc: ResourceRef;
+  route_table: ResourceRef | null;
+  name: string;
+  description?: string;
+  cidr_ipv4: string;
+  gateway_ipv4: string;
+  cidr_ipv6?: string | null;
+  gateway_ipv6?: string | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
+};
 export type VpcCreateRequestInput = {
   name: string;
   description?: string;
@@ -506,12 +494,38 @@ export type VpcCreateRequestInput = {
   tags?: { [key: string]: string };
   cidr_ipv6?: string;
 };
-export type VpcResponse = { vpc?: Vpc };
+export type VpcResponse = { vpc: Vpc };
+export type Vpc = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  cidr_ipv4: string;
+  cidr_ipv6?: string | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
+};
+export type SubnetIPv6RequestInput = {
+  allocate_cidr_ipv6?: boolean;
+  cidr_ipv6?: string;
+  copy_ipv4_security_rules?: boolean;
+  ipv6_routing?:
+    | "match_ipv4"
+    | "unchanged"
+    | "internet_gateway"
+    | "nat_gateway"
+    | "egress_only_gateway";
+} & ({ allocate_cidr_ipv6: unknown } | { cidr_ipv6: unknown });
+export type VpcIPv6RequestInput = {
+  allocate_cidr_ipv6?: boolean;
+  cidr_ipv6?: string;
+} & ({ allocate_cidr_ipv6: unknown } | { cidr_ipv6: unknown });
 export type GatewayRouteListResponse = {
   routes: GatewayRoute[];
   meta: PaginationMeta;
 };
-export type GatewayRoute = Route & { route_table: RouteTableSummary };
+export type GatewayRoute = Route & { route_table: ResourceRef };
 export type PaginationMeta = {
   total?: number;
   limit?: number;
@@ -522,11 +536,18 @@ export type EgressOnlyGatewayListResponse = {
   egress_only_gateways: EgressOnlyGateway[];
   meta: PaginationMeta;
 };
+export type FloatingIpInterfaceListResponse = {
+  interfaces: FloatingIpInterface[];
+  meta: PaginationMeta;
+};
 export type FloatingIpListResponse = {
   floating_ips: FloatingIp[];
   meta: PaginationMeta;
 };
-export type InterfaceSecurityGroupsResponse = { security_group_ids: string[] };
+export type SecurityGroupListResponse = {
+  security_groups: SecurityGroup[];
+  meta: PaginationMeta;
+};
 export type InterfaceListResponse = {
   interfaces: Interface[];
   meta: PaginationMeta;
@@ -548,13 +569,8 @@ export type SecurityGroupRuleListResponse = {
   rules: SecurityGroupRule[];
   meta: PaginationMeta;
 };
-export type SecurityGroupListResponse = {
-  security_groups: SecurityGroup[];
-  meta: PaginationMeta;
-};
 export type SubnetListResponse = { subnets: Subnet[]; meta: PaginationMeta };
 export type VpcListResponse = { vpcs: Vpc[]; meta: PaginationMeta };
-export type InterfaceSecurityGroupsRequestInput = { security_groups: string[] };
 export type EgressOnlyGatewayUpdateRequestInput = {
   description?: string | null;
   tags?: { [key: string]: string };
@@ -562,8 +578,7 @@ export type EgressOnlyGatewayUpdateRequestInput = {
 export type FloatingIpUpdateRequestInput = {
   description?: string | null;
   tags?: { [key: string]: string };
-  health_check?:
-    ({ [key: string]: unknown } & FloatingIpHealthCheckInput) | null;
+  health_check?: FloatingIpHealthCheckInput | null;
 };
 export type InterfaceUpdateRequestInput = {
   description?: string | null;
@@ -593,27 +608,16 @@ export type SubnetUpdateRequestInput = {
   description?: string | null;
   route_table?: string;
   tags?: { [key: string]: string };
-  allocate_cidr_ipv6?: boolean;
-  cidr_ipv6?: string | null;
-  copy_ipv4_security_rules?: boolean;
-  ipv6_routing?:
-    | "match_ipv4"
-    | "unchanged"
-    | "internet_gateway"
-    | "nat_gateway"
-    | "egress_only_gateway";
 };
 export type VpcUpdateRequestInput = {
   description?: string | null;
   tags?: { [key: string]: string };
-  allocate_cidr_ipv6?: boolean;
-  cidr_ipv6?: string;
 };
 const operations = {
   attachFloatingIp: {
     id: "attachFloatingIp",
     method: "POST",
-    path: "/v1/floating-ips/{floating_ip_id}/attach",
+    path: "/v1/floating-ips/{floating_ip_id}/interfaces",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -622,10 +626,10 @@ const operations = {
     contentType: "application/json",
     accept: "application/json",
   },
-  attachInternetGateway: {
-    id: "attachInternetGateway",
+  attachInterfaceSecurityGroup: {
+    id: "attachInterfaceSecurityGroup",
     method: "POST",
-    path: "/v1/internet-gateways/{internet_gateway_id}/attach",
+    path: "/v1/interfaces/{interface_id}/security-groups",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -972,26 +976,62 @@ const operations = {
   },
   detachFloatingIp: {
     id: "detachFloatingIp",
-    method: "POST",
-    path: "/v1/floating-ips/{floating_ip_id}/detach",
-    authenticated: true,
-    requiredQuery: [],
-    requiredHeaders: [],
-    queryEncoding: {},
-    bodyRequired: false,
-    contentType: "application/json",
-    accept: "application/json",
-  },
-  detachInternetGateway: {
-    id: "detachInternetGateway",
-    method: "POST",
-    path: "/v1/internet-gateways/{internet_gateway_id}/detach",
+    method: "DELETE",
+    path: "/v1/floating-ips/{floating_ip_id}/interfaces",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {},
     bodyRequired: false,
     contentType: "",
+    accept: "application/json",
+  },
+  detachFloatingIpInterface: {
+    id: "detachFloatingIpInterface",
+    method: "DELETE",
+    path: "/v1/floating-ips/{floating_ip_id}/interfaces/{interface_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  detachInterfaceSecurityGroup: {
+    id: "detachInterfaceSecurityGroup",
+    method: "DELETE",
+    path: "/v1/interfaces/{interface_id}/security-groups/{security_group_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  enableSubnetIPv6: {
+    id: "enableSubnetIPv6",
+    method: "POST",
+    path: "/v1/subnets/{subnet_id}/ipv6",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  enableVPCIPv6: {
+    id: "enableVPCIPv6",
+    method: "POST",
+    path: "/v1/vpcs/{vpc_id}/ipv6",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
     accept: "application/json",
   },
   getEgressOnlyGateway: {
@@ -1174,6 +1214,24 @@ const operations = {
     accept: "application/json",
     itemsKey: "egress_only_gateways",
   },
+  listFloatingIpInterfaces: {
+    id: "listFloatingIpInterfaces",
+    method: "GET",
+    path: "/v1/floating-ips/{floating_ip_id}/interfaces",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+      crn: { style: "form", explode: true },
+      name: { style: "form", explode: true },
+    },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "interfaces",
+  },
   listFloatingIps: {
     id: "listFloatingIps",
     method: "GET",
@@ -1217,7 +1275,7 @@ const operations = {
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "routed_prefixes",
+    itemsKey: "prefixes",
   },
   listInterfaceSecurityGroups: {
     id: "listInterfaceSecurityGroups",
@@ -1229,11 +1287,13 @@ const operations = {
     queryEncoding: {
       name: { style: "form", explode: true },
       crn: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
     },
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "security_group_ids",
+    itemsKey: "security_groups",
   },
   listInterfaces: {
     id: "listInterfaces",
@@ -1452,18 +1512,6 @@ const operations = {
     accept: "application/json",
     itemsKey: "vpcs",
   },
-  setInterfaceSecurityGroups: {
-    id: "setInterfaceSecurityGroups",
-    method: "PUT",
-    path: "/v1/interfaces/{interface_id}/security-groups",
-    authenticated: true,
-    requiredQuery: [],
-    requiredHeaders: [],
-    queryEncoding: {},
-    bodyRequired: true,
-    contentType: "application/json",
-    accept: "application/json",
-  },
   updateEgressOnlyGateway: {
     id: "updateEgressOnlyGateway",
     method: "PATCH",
@@ -1587,7 +1635,7 @@ const operations = {
 } as const satisfies Record<string, Operation>;
 export class NetworkService {
   constructor(private readonly transport: Transport) {}
-  /** Attach a floating IP to an interface */
+  /** Attach an interface to a floating IP */
   attachFloatingIp(
     floating_ip_id: string,
     body: AttachFloatingIpBody,
@@ -1603,17 +1651,17 @@ export class NetworkService {
       options,
     );
   }
-  /** Attach internet gateway to a VPC */
-  attachInternetGateway(
-    internet_gateway_id: string,
-    body: AttachInternetGatewayBody,
+  /** Attach a security group to an interface */
+  attachInterfaceSecurityGroup(
+    interface_id: string,
+    body: AttachInterfaceSecurityGroupBody,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<AttachInternetGatewayResponse>> {
-    return this.transport.json<AttachInternetGatewayResponse>(
+  ): Promise<ApiResponse<AttachInterfaceSecurityGroupResponse>> {
+    return this.transport.json<AttachInterfaceSecurityGroupResponse>(
       "network",
       "https://network.{region}.basaltic.sh",
-      operations.attachInternetGateway,
-      { internet_gateway_id },
+      operations.attachInterfaceSecurityGroup,
+      { interface_id },
       body,
       {},
       options,
@@ -2043,33 +2091,81 @@ export class NetworkService {
       options,
     );
   }
-  /** Detach a floating IP */
+  /** Detach all direct interfaces from a floating IP */
   detachFloatingIp(
     floating_ip_id: string,
-    body: DetachFloatingIpBody | undefined = undefined,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<DetachFloatingIpResponse>> {
-    return this.transport.json<DetachFloatingIpResponse>(
+  ): Promise<void> {
+    return this.transport.discard(
       "network",
       "https://network.{region}.basaltic.sh",
       operations.detachFloatingIp,
       { floating_ip_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  /** Detach an interface from a floating IP */
+  detachFloatingIpInterface(
+    floating_ip_id: string,
+    interface_id: string,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    return this.transport.discard(
+      "network",
+      "https://network.{region}.basaltic.sh",
+      operations.detachFloatingIpInterface,
+      { floating_ip_id, interface_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  /** Detach a security group from an interface */
+  detachInterfaceSecurityGroup(
+    interface_id: string,
+    security_group_id: string,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    return this.transport.discard(
+      "network",
+      "https://network.{region}.basaltic.sh",
+      operations.detachInterfaceSecurityGroup,
+      { interface_id, security_group_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  /** Enable IPv6 on a subnet */
+  enableSubnetIPv6(
+    subnet_id: string,
+    body: EnableSubnetIPv6Body,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<EnableSubnetIPv6Response>> {
+    return this.transport.json<EnableSubnetIPv6Response>(
+      "network",
+      "https://network.{region}.basaltic.sh",
+      operations.enableSubnetIPv6,
+      { subnet_id },
       body,
       {},
       options,
     );
   }
-  /** Detach internet gateway from its VPC */
-  detachInternetGateway(
-    internet_gateway_id: string,
+  /** Enable IPv6 on a vpc */
+  enableVPCIPv6(
+    vpc_id: string,
+    body: EnableVPCIPv6Body,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<DetachInternetGatewayResponse>> {
-    return this.transport.json<DetachInternetGatewayResponse>(
+  ): Promise<ApiResponse<EnableVPCIPv6Response>> {
+    return this.transport.json<EnableVPCIPv6Response>(
       "network",
       "https://network.{region}.basaltic.sh",
-      operations.detachInternetGateway,
-      { internet_gateway_id },
-      undefined,
+      operations.enableVPCIPv6,
+      { vpc_id },
+      body,
       {},
       options,
     );
@@ -2511,6 +2607,42 @@ export class NetworkService {
       query.marker ?? "",
     );
   }
+  /** List a floating IP’s interfaces */
+  listFloatingIpInterfaces(
+    floating_ip_id: string,
+    query: ListFloatingIpInterfacesQuery = {},
+    options: RequestOptions = {},
+  ): Promise<
+    Page<ListFloatingIpInterfacesResponse, ListFloatingIpInterfacesItem>
+  > {
+    return this.transport.page<
+      ListFloatingIpInterfacesResponse,
+      ListFloatingIpInterfacesItem
+    >(
+      "network",
+      "https://network.{region}.basaltic.sh",
+      operations.listFloatingIpInterfaces,
+      { floating_ip_id },
+      undefined,
+      query,
+      options,
+    );
+  }
+  listFloatingIpInterfacesAll(
+    floating_ip_id: string,
+    query: ListFloatingIpInterfacesQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListFloatingIpInterfacesItem> {
+    return iteratePages(
+      (marker) =>
+        this.listFloatingIpInterfaces(
+          floating_ip_id,
+          { ...query, marker },
+          options,
+        ),
+      query.marker ?? "",
+    );
+  }
   /** List floating IPs */
   listFloatingIps(
     query: ListFloatingIpsQuery = {},
@@ -2571,7 +2703,7 @@ export class NetworkService {
       options,
     );
   }
-  /** List interface security-group membership */
+  /** List an interface’s security groups */
   listInterfaceSecurityGroups(
     interface_id: string,
     query: ListInterfaceSecurityGroupsQuery = {},
@@ -2590,6 +2722,21 @@ export class NetworkService {
       undefined,
       query,
       options,
+    );
+  }
+  listInterfaceSecurityGroupsAll(
+    interface_id: string,
+    query: ListInterfaceSecurityGroupsQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListInterfaceSecurityGroupsItem> {
+    return iteratePages(
+      (marker) =>
+        this.listInterfaceSecurityGroups(
+          interface_id,
+          { ...query, marker },
+          options,
+        ),
+      query.marker ?? "",
     );
   }
   /** List interfaces */
@@ -2910,22 +3057,6 @@ export class NetworkService {
     return iteratePages(
       (marker) => this.listVpcs({ ...query, marker }, options),
       query.marker ?? "",
-    );
-  }
-  /** Set interface security-group membership */
-  setInterfaceSecurityGroups(
-    interface_id: string,
-    body: SetInterfaceSecurityGroupsBody,
-    options: RequestOptions = {},
-  ): Promise<ApiResponse<SetInterfaceSecurityGroupsResponse>> {
-    return this.transport.json<SetInterfaceSecurityGroupsResponse>(
-      "network",
-      "https://network.{region}.basaltic.sh",
-      operations.setInterfaceSecurityGroups,
-      { interface_id },
-      body,
-      {},
-      options,
     );
   }
   /** Update egress-only gateway */

@@ -47,8 +47,7 @@ export type Secret = {
   description?: string;
   tags?: Tags;
   crn: string;
-  kms_key_unavailable?: boolean;
-  kms_key_crn?: string | null;
+  kms_key?: ResourceRef;
   managed: boolean;
   deleted_at?: string | null;
   scheduled_purge_at?: string | null;
@@ -58,10 +57,10 @@ export type Secret = {
   updated_at: string;
 };
 export type Tags = { [key: string]: string };
+export type ResourceRef = { id: string; crn: string; name?: string };
 export type DeleteSecretRequestInput = { recovery_window_days?: number };
 export type SecretValueResponse = { secret: SecretValue };
 export type SecretValue = {
-  secret_id: string;
   name: string;
   version: number;
   value: string;
@@ -83,7 +82,6 @@ export type SecretVersion = {
   id: string;
   version: number;
   is_current: boolean;
-  created_by?: string;
   created_at: string;
 };
 export type PutSecretValueRequestInput = { value: string };

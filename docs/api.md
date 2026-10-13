@@ -87,7 +87,7 @@ listCredits(query: ListCreditsQuery = {}, options: RequestOptions = {}): Promise
 
 ## `billing.listFiscalInvoices`
 
-List fiscal invoice issuance and delivery status
+List issued fiscal invoices
 
 `GET /v1/fiscal-invoices`
 
@@ -145,16 +145,6 @@ Save organization billing details
 updateBillingProfile(body: UpdateBillingProfileBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateBillingProfileResponse>>
 ```
 
-## `catalog.getCountry`
-
-Get a country and its address rules
-
-`GET /v1/countries/{country}`
-
-```ts
-getCountry(country: string, options: RequestOptions = {}): Promise<ApiResponse<GetCountryResponse>>
-```
-
 ## `catalog.getRegion`
 
 Get a region
@@ -165,26 +155,6 @@ Get a region
 getRegion(code: string, options: RequestOptions = {}): Promise<ApiResponse<GetRegionResponse>>
 ```
 
-## `catalog.listCities`
-
-List cities
-
-`GET /v1/cities`
-
-```ts
-listCities(query: ListCitiesQuery = {}, options: RequestOptions = {}): Promise<Page<ListCitiesResponse, ListCitiesItem>>
-```
-
-## `catalog.listCountries`
-
-List countries
-
-`GET /v1/countries`
-
-```ts
-listCountries(options: RequestOptions = {}): Promise<Page<ListCountriesResponse, ListCountriesItem>>
-```
-
 ## `catalog.listRegions`
 
 List regions
@@ -193,26 +163,6 @@ List regions
 
 ```ts
 listRegions(query: ListRegionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListRegionsResponse, ListRegionsItem>>
-```
-
-## `catalog.listStates`
-
-List a country's states
-
-`GET /v1/states`
-
-```ts
-listStates(query: ListStatesQuery, options: RequestOptions = {}): Promise<Page<ListStatesResponse, ListStatesItem>>
-```
-
-## `catalog.lookupPostalCode`
-
-Look up a postal code
-
-`GET /v1/postal-codes/{code}`
-
-```ts
-lookupPostalCode(code: string, query: LookupPostalCodeQuery, options: RequestOptions = {}): Promise<ApiResponse<LookupPostalCodeResponse>>
 ```
 
 ## `certificate.createCertificate`
@@ -275,14 +225,14 @@ Revoke certificate
 revokeCertificate(certificate_id: string, options: RequestOptions = {}): Promise<ApiResponse<RevokeCertificateResponse>>
 ```
 
-## `compute.attachInstanceNIC`
+## `compute.attachInstanceInterface`
 
 Attach an existing NIC to an instance
 
-`POST /v1/instances/{instance_id}/nics`
+`POST /v1/instances/{instance_id}/interfaces`
 
 ```ts
-attachInstanceNIC(instance_id: string, body: AttachInstanceNICBody, options: RequestOptions = {}): Promise<ApiResponse<AttachInstanceNICResponse>>
+attachInstanceInterface(instance_id: string, body: AttachInstanceInterfaceBody, options: RequestOptions = {}): Promise<ApiResponse<AttachInstanceInterfaceResponse>>
 ```
 
 ## `compute.attachInstancePoolFloatingIp`
@@ -375,14 +325,14 @@ Delete an instance pool
 deleteInstancePool(pool_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
-## `compute.detachInstanceNIC`
+## `compute.detachInstanceInterface`
 
-Detach a NIC from a running instance
+Detach an interface from a running instance
 
-`DELETE /v1/instances/{instance_id}/nics/{interface_id}`
+`DELETE /v1/instances/{instance_id}/interfaces/{interface_id}`
 
 ```ts
-detachInstanceNIC(instance_id: string, interface_id: string, options: RequestOptions = {}): Promise<void>
+detachInstanceInterface(instance_id: string, interface_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
 ## `compute.detachInstancePoolFloatingIp`
@@ -495,14 +445,14 @@ List images
 listImages(query: ListImagesQuery = {}, options: RequestOptions = {}): Promise<Page<ListImagesResponse, ListImagesItem>>
 ```
 
-## `compute.listInstanceNICs`
+## `compute.listInstanceInterfaces`
 
 List the instance's network interfaces
 
-`GET /v1/instances/{instance_id}/nics`
+`GET /v1/instances/{instance_id}/interfaces`
 
 ```ts
-listInstanceNICs(instance_id: string, query: ListInstanceNICsQuery = {}, options: RequestOptions = {}): Promise<Page<ListInstanceNICsResponse, ListInstanceNICsItem>>
+listInstanceInterfaces(instance_id: string, query: ListInstanceInterfacesQuery = {}, options: RequestOptions = {}): Promise<Page<ListInstanceInterfacesResponse, ListInstanceInterfacesItem>>
 ```
 
 ## `compute.listInstancePoolFloatingIps`
@@ -895,6 +845,16 @@ Approve a CLI login and issue an authorization code
 authorizeOAuthClient(body: AuthorizeOAuthClientBody, options: RequestOptions = {}): Promise<ApiResponse<AuthorizeOAuthClientResponse>>
 ```
 
+## `iam.createOIDCProvider`
+
+Create an OIDC provider
+
+`POST /v1/oidc-providers`
+
+```ts
+createOIDCProvider(body: CreateOIDCProviderBody, options: RequestOptions = {}): Promise<ApiResponse<CreateOIDCProviderResponse>>
+```
+
 ## `iam.createPersonalSSHKey`
 
 Add personal SSH key
@@ -953,6 +913,16 @@ Add service-account SSH key
 
 ```ts
 createServiceAccountSSHKey(service_account_id: string, body: CreateServiceAccountSSHKeyBody, options: RequestOptions = {}): Promise<ApiResponse<CreateServiceAccountSSHKeyResponse>>
+```
+
+## `iam.deleteOIDCProvider`
+
+Delete an OIDC provider
+
+`DELETE /v1/oidc-providers/{provider_id}`
+
+```ts
+deleteOIDCProvider(provider_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
 ## `iam.deletePersonalSSHKey`
@@ -1065,6 +1035,16 @@ Exchange an access key for a bearer token
 getOAuthToken(body: GetOAuthTokenBody, options: RequestOptions = {}): Promise<ApiResponse<GetOAuthTokenResponse>>
 ```
 
+## `iam.getOIDCProvider`
+
+Get an OIDC provider
+
+`GET /v1/oidc-providers/{provider_id}`
+
+```ts
+getOIDCProvider(provider_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetOIDCProviderResponse>>
+```
+
 ## `iam.getPersonalLinuxIdentity`
 
 Get personal Linux identity
@@ -1165,6 +1145,16 @@ Get a service account's permission boundary
 getServiceAccountPermissionBoundary(service_account_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetServiceAccountPermissionBoundaryResponse>>
 ```
 
+## `iam.listOIDCProviders`
+
+List OIDC providers
+
+`GET /v1/oidc-providers`
+
+```ts
+listOIDCProviders(query: ListOIDCProvidersQuery = {}, options: RequestOptions = {}): Promise<Page<ListOIDCProvidersResponse, ListOIDCProvidersItem>>
+```
+
 ## `iam.listPersonalSSHKeys`
 
 List personal SSH keys
@@ -1203,16 +1193,6 @@ List service accounts with policy
 
 ```ts
 listPolicyServiceAccounts(policy_id: string, query: ListPolicyServiceAccountsQuery = {}, options: RequestOptions = {}): Promise<Page<ListPolicyServiceAccountsResponse, ListPolicyServiceAccountsItem>>
-```
-
-## `iam.listRegions`
-
-List regions (legacy IAM)
-
-`GET /v1/regions`
-
-```ts
-listRegions(query: ListRegionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListRegionsResponse, ListRegionsItem>>
 ```
 
 ## `iam.listRoleInlinePolicies`
@@ -1383,6 +1363,16 @@ Set a service account's permission boundary
 
 ```ts
 setServiceAccountPermissionBoundary(service_account_id: string, body: SetServiceAccountPermissionBoundaryBody, options: RequestOptions = {}): Promise<void>
+```
+
+## `iam.updateOIDCProvider`
+
+Update an OIDC provider
+
+`PATCH /v1/oidc-providers/{provider_id}`
+
+```ts
+updateOIDCProvider(provider_id: string, body: UpdateOIDCProviderBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateOIDCProviderResponse>>
 ```
 
 ## `iam.updatePolicy`
@@ -1785,6 +1775,16 @@ Get a target group
 getTargetGroup(id: string, options: RequestOptions = {}): Promise<ApiResponse<GetTargetGroupResponse>>
 ```
 
+## `loadbalancer.listListenerCertificates`
+
+List listener certificates
+
+`GET /v1/load-balancers/{id}/listeners/{listener_id}/certificates`
+
+```ts
+listListenerCertificates(id: string, listener_id: string, options: RequestOptions = {}): Promise<Page<ListListenerCertificatesResponse, ListListenerCertificatesItem>>
+```
+
 ## `loadbalancer.listListeners`
 
 List this load balancer's listeners
@@ -1795,14 +1795,14 @@ List this load balancer's listeners
 listListeners(id: string, query: ListListenersQuery = {}, options: RequestOptions = {}): Promise<Page<ListListenersResponse, ListListenersItem>>
 ```
 
-## `loadbalancer.listLoadBalancerReplicas`
+## `loadbalancer.listLoadBalancerInstances`
 
-List the LB's instance replicas with live health
+List a load balancer's instances
 
-`GET /v1/load-balancers/{id}/replicas`
+`GET /v1/load-balancers/{id}/instances`
 
 ```ts
-listLoadBalancerReplicas(id: string, query: ListLoadBalancerReplicasQuery = {}, options: RequestOptions = {}): Promise<Page<ListLoadBalancerReplicasResponse, ListLoadBalancerReplicasItem>>
+listLoadBalancerInstances(id: string, query: ListLoadBalancerInstancesQuery = {}, options: RequestOptions = {}): Promise<Page<ListLoadBalancerInstancesResponse, ListLoadBalancerInstancesItem>>
 ```
 
 ## `loadbalancer.listLoadBalancers`
@@ -1847,7 +1847,7 @@ listTargets(id: string, query: ListTargetsQuery = {}, options: RequestOptions = 
 
 ## `loadbalancer.updateListener`
 
-Patch a listener (rotate cert, change default target group)
+Update a listener
 
 `PATCH /v1/load-balancers/{id}/listeners/{listener_id}`
 
@@ -1887,22 +1887,22 @@ updateTargetGroup(id: string, body: UpdateTargetGroupBody, options: RequestOptio
 
 ## `network.attachFloatingIp`
 
-Attach a floating IP to an interface
+Attach an interface to a floating IP
 
-`POST /v1/floating-ips/{floating_ip_id}/attach`
+`POST /v1/floating-ips/{floating_ip_id}/interfaces`
 
 ```ts
 attachFloatingIp(floating_ip_id: string, body: AttachFloatingIpBody, options: RequestOptions = {}): Promise<ApiResponse<AttachFloatingIpResponse>>
 ```
 
-## `network.attachInternetGateway`
+## `network.attachInterfaceSecurityGroup`
 
-Attach internet gateway to a VPC
+Attach a security group to an interface
 
-`POST /v1/internet-gateways/{internet_gateway_id}/attach`
+`POST /v1/interfaces/{interface_id}/security-groups`
 
 ```ts
-attachInternetGateway(internet_gateway_id: string, body: AttachInternetGatewayBody, options: RequestOptions = {}): Promise<ApiResponse<AttachInternetGatewayResponse>>
+attachInterfaceSecurityGroup(interface_id: string, body: AttachInterfaceSecurityGroupBody, options: RequestOptions = {}): Promise<ApiResponse<AttachInterfaceSecurityGroupResponse>>
 ```
 
 ## `network.createEgressOnlyGateway`
@@ -2187,22 +2187,52 @@ deleteVpc(vpc_id: string, options: RequestOptions = {}): Promise<void>
 
 ## `network.detachFloatingIp`
 
-Detach a floating IP
+Detach all direct interfaces from a floating IP
 
-`POST /v1/floating-ips/{floating_ip_id}/detach`
+`DELETE /v1/floating-ips/{floating_ip_id}/interfaces`
 
 ```ts
-detachFloatingIp(floating_ip_id: string, body: DetachFloatingIpBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<DetachFloatingIpResponse>>
+detachFloatingIp(floating_ip_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
-## `network.detachInternetGateway`
+## `network.detachFloatingIpInterface`
 
-Detach internet gateway from its VPC
+Detach an interface from a floating IP
 
-`POST /v1/internet-gateways/{internet_gateway_id}/detach`
+`DELETE /v1/floating-ips/{floating_ip_id}/interfaces/{interface_id}`
 
 ```ts
-detachInternetGateway(internet_gateway_id: string, options: RequestOptions = {}): Promise<ApiResponse<DetachInternetGatewayResponse>>
+detachFloatingIpInterface(floating_ip_id: string, interface_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `network.detachInterfaceSecurityGroup`
+
+Detach a security group from an interface
+
+`DELETE /v1/interfaces/{interface_id}/security-groups/{security_group_id}`
+
+```ts
+detachInterfaceSecurityGroup(interface_id: string, security_group_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `network.enableSubnetIPv6`
+
+Enable IPv6 on a subnet
+
+`POST /v1/subnets/{subnet_id}/ipv6`
+
+```ts
+enableSubnetIPv6(subnet_id: string, body: EnableSubnetIPv6Body, options: RequestOptions = {}): Promise<ApiResponse<EnableSubnetIPv6Response>>
+```
+
+## `network.enableVPCIPv6`
+
+Enable IPv6 on a vpc
+
+`POST /v1/vpcs/{vpc_id}/ipv6`
+
+```ts
+enableVPCIPv6(vpc_id: string, body: EnableVPCIPv6Body, options: RequestOptions = {}): Promise<ApiResponse<EnableVPCIPv6Response>>
 ```
 
 ## `network.getEgressOnlyGateway`
@@ -2345,6 +2375,16 @@ List egress-only gateways
 listEgressOnlyGateways(query: ListEgressOnlyGatewaysQuery = {}, options: RequestOptions = {}): Promise<Page<ListEgressOnlyGatewaysResponse, ListEgressOnlyGatewaysItem>>
 ```
 
+## `network.listFloatingIpInterfaces`
+
+List a floating IP’s interfaces
+
+`GET /v1/floating-ips/{floating_ip_id}/interfaces`
+
+```ts
+listFloatingIpInterfaces(floating_ip_id: string, query: ListFloatingIpInterfacesQuery = {}, options: RequestOptions = {}): Promise<Page<ListFloatingIpInterfacesResponse, ListFloatingIpInterfacesItem>>
+```
+
 ## `network.listFloatingIps`
 
 List floating IPs
@@ -2377,7 +2417,7 @@ listInterfacePrefixes(interface_id: string, options: RequestOptions = {}): Promi
 
 ## `network.listInterfaceSecurityGroups`
 
-List interface security-group membership
+List an interface’s security groups
 
 `GET /v1/interfaces/{interface_id}/security-groups`
 
@@ -2503,16 +2543,6 @@ List VPCs
 
 ```ts
 listVpcs(query: ListVpcsQuery = {}, options: RequestOptions = {}): Promise<Page<ListVpcsResponse, ListVpcsItem>>
-```
-
-## `network.setInterfaceSecurityGroups`
-
-Set interface security-group membership
-
-`PUT /v1/interfaces/{interface_id}/security-groups`
-
-```ts
-setInterfaceSecurityGroups(interface_id: string, body: SetInterfaceSecurityGroupsBody, options: RequestOptions = {}): Promise<ApiResponse<SetInterfaceSecurityGroupsResponse>>
 ```
 
 ## `network.updateEgressOnlyGateway`
@@ -2759,10 +2789,10 @@ createSnapshot(body: CreateSnapshotBody, options: RequestOptions = {}): Promise<
 
 Create snapshot policy
 
-`POST /v1/snapshot-policies`
+`POST /v1/volumes/{volume_id}/snapshot-policies`
 
 ```ts
-createSnapshotPolicy(body: CreateSnapshotPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<CreateSnapshotPolicyResponse>>
+createSnapshotPolicy(volume_id: string, body: CreateSnapshotPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<CreateSnapshotPolicyResponse>>
 ```
 
 ## `storage.createVolume`
@@ -2869,10 +2899,10 @@ deleteSnapshot(snapshot_id: string, options: RequestOptions = {}): Promise<void>
 
 Delete snapshot policy
 
-`DELETE /v1/snapshot-policies/{policy_id}`
+`DELETE /v1/volumes/{volume_id}/snapshot-policies/{policy_id}`
 
 ```ts
-deleteSnapshotPolicy(policy_id: string, options: RequestOptions = {}): Promise<void>
+deleteSnapshotPolicy(volume_id: string, policy_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
 ## `storage.deleteVolume`
@@ -2989,10 +3019,10 @@ getSnapshot(snapshot_id: string, options: RequestOptions = {}): Promise<ApiRespo
 
 Get snapshot policy
 
-`GET /v1/snapshot-policies/{policy_id}`
+`GET /v1/volumes/{volume_id}/snapshot-policies/{policy_id}`
 
 ```ts
-getSnapshotPolicy(policy_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetSnapshotPolicyResponse>>
+getSnapshotPolicy(volume_id: string, policy_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetSnapshotPolicyResponse>>
 ```
 
 ## `storage.getVolume`
@@ -3089,10 +3119,10 @@ listParts(bucket: string, upload_id: string, options: RequestOptions = {}): Prom
 
 List snapshot policies
 
-`GET /v1/snapshot-policies`
+`GET /v1/volumes/{volume_id}/snapshot-policies`
 
 ```ts
-listSnapshotPolicies(query: ListSnapshotPoliciesQuery = {}, options: RequestOptions = {}): Promise<Page<ListSnapshotPoliciesResponse, ListSnapshotPoliciesItem>>
+listSnapshotPolicies(volume_id: string, query: ListSnapshotPoliciesQuery = {}, options: RequestOptions = {}): Promise<Page<ListSnapshotPoliciesResponse, ListSnapshotPoliciesItem>>
 ```
 
 ## `storage.listSnapshots`
@@ -3239,10 +3269,10 @@ updateSnapshot(snapshot_id: string, body: UpdateSnapshotBody, options: RequestOp
 
 Update snapshot policy
 
-`PATCH /v1/snapshot-policies/{policy_id}`
+`PATCH /v1/volumes/{volume_id}/snapshot-policies/{policy_id}`
 
 ```ts
-updateSnapshotPolicy(policy_id: string, body: UpdateSnapshotPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateSnapshotPolicyResponse>>
+updateSnapshotPolicy(volume_id: string, policy_id: string, body: UpdateSnapshotPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateSnapshotPolicyResponse>>
 ```
 
 ## `storage.updateVolume`
@@ -3329,7 +3359,7 @@ getLogGroup(id: string, options: RequestOptions = {}): Promise<ApiResponse<GetLo
 
 Check retained telemetry presence
 
-`GET /v1/trace-settings/retained-data`
+`GET /v1/retained-data`
 
 ```ts
 getRetainedTelemetryPresence(options: RequestOptions = {}): Promise<ApiResponse<GetRetainedTelemetryPresenceResponse>>
@@ -3337,7 +3367,7 @@ getRetainedTelemetryPresence(options: RequestOptions = {}): Promise<ApiResponse<
 
 ## `telemetry.getTrace`
 
-Get all spans for a trace
+Get a trace
 
 `GET /v1/traces/{trace_id}`
 
@@ -3387,7 +3417,7 @@ listLogGroups(query: ListLogGroupsQuery = {}, options: RequestOptions = {}): Pro
 
 ## `telemetry.listMetricNames`
 
-List the distinct metric names emitted in a time window
+List metric names
 
 `GET /v1/metrics/names`
 
@@ -3397,47 +3427,47 @@ listMetricNames(query: ListMetricNamesQuery, options: RequestOptions = {}): Prom
 
 ## `telemetry.listMetricNamesPost`
 
-List the distinct metric names emitted in a time window (form body)
+List metric names (JSON)
 
 `POST /v1/metrics/names`
 
 ```ts
-listMetricNamesPost(body: ListMetricNamesPostBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<ListMetricNamesPostResponse>>
+listMetricNamesPost(body: ListMetricNamesPostBody, options: RequestOptions = {}): Promise<ApiResponse<ListMetricNamesPostResponse>>
 ```
 
 ## `telemetry.listMetricSeries`
 
-List distinct label sets for a metric
+List metric series
 
 `GET /v1/metrics/series`
 
 ```ts
-listMetricSeries(query: ListMetricSeriesQuery, options: RequestOptions = {}): Promise<ApiResponse<ListMetricSeriesResponse>>
+listMetricSeries(query: ListMetricSeriesQuery, options: RequestOptions = {}): Promise<Page<ListMetricSeriesResponse, ListMetricSeriesItem>>
 ```
 
 ## `telemetry.listMetricSeriesPost`
 
-List distinct label sets for a metric (form body)
+List metric series (JSON)
 
 `POST /v1/metrics/series`
 
 ```ts
-listMetricSeriesPost(body: ListMetricSeriesPostBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<ListMetricSeriesPostResponse>>
+listMetricSeriesPost(body: ListMetricSeriesPostBody, options: RequestOptions = {}): Promise<ApiResponse<ListMetricSeriesPostResponse>>
 ```
 
-## `telemetry.putTraceSettings`
+## `telemetry.listTraceSpans`
 
-Update the caller account's trace settings
+List spans in a trace
 
-`PUT /v1/trace-settings`
+`GET /v1/traces/{trace_id}/spans`
 
 ```ts
-putTraceSettings(body: PutTraceSettingsBody, options: RequestOptions = {}): Promise<ApiResponse<PutTraceSettingsResponse>>
+listTraceSpans(trace_id: string, query: ListTraceSpansQuery = {}, options: RequestOptions = {}): Promise<Page<ListTraceSpansResponse, ListTraceSpansItem>>
 ```
 
 ## `telemetry.queryMetricsInstant`
 
-Instant structured metric query
+Run an instant metric query
 
 `GET /v1/metrics/query`
 
@@ -3447,19 +3477,19 @@ queryMetricsInstant(query: QueryMetricsInstantQuery, options: RequestOptions = {
 
 ## `telemetry.queryMetricsInstantPost`
 
-Instant structured metric query (form body)
+Run an instant metric query (JSON)
 
 `POST /v1/metrics/query`
 
 ```ts
-queryMetricsInstantPost(body: QueryMetricsInstantPostBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<QueryMetricsInstantPostResponse>>
+queryMetricsInstantPost(body: QueryMetricsInstantPostBody, options: RequestOptions = {}): Promise<ApiResponse<QueryMetricsInstantPostResponse>>
 ```
 
 ## `telemetry.queryMetricsRange`
 
-Range structured metric query
+Run a range metric query
 
-`GET /v1/metrics/query_range`
+`GET /v1/metrics/query-range`
 
 ```ts
 queryMetricsRange(query: QueryMetricsRangeQuery, options: RequestOptions = {}): Promise<ApiResponse<QueryMetricsRangeResponse>>
@@ -3467,12 +3497,12 @@ queryMetricsRange(query: QueryMetricsRangeQuery, options: RequestOptions = {}): 
 
 ## `telemetry.queryMetricsRangePost`
 
-Range structured metric query (form body)
+Run a range metric query (JSON)
 
-`POST /v1/metrics/query_range`
+`POST /v1/metrics/query-range`
 
 ```ts
-queryMetricsRangePost(body: QueryMetricsRangePostBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<QueryMetricsRangePostResponse>>
+queryMetricsRangePost(body: QueryMetricsRangePostBody, options: RequestOptions = {}): Promise<ApiResponse<QueryMetricsRangePostResponse>>
 ```
 
 ## `telemetry.searchLogs`
@@ -3503,6 +3533,16 @@ Update a log group
 
 ```ts
 updateLogGroup(id: string, body: UpdateLogGroupBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateLogGroupResponse>>
+```
+
+## `telemetry.updateTraceSettings`
+
+Update the caller account's trace settings
+
+`PATCH /v1/trace-settings`
+
+```ts
+updateTraceSettings(body: UpdateTraceSettingsBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateTraceSettingsResponse>>
 ```
 
 ## `telemetry.writeMetrics`

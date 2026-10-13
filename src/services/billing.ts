@@ -3,9 +3,9 @@ import type { Transport, Operation } from "../transport.js";
 import type { RequestOptions } from "../config.js";
 import type { ApiResponse, Page } from "../response.js";
 import { iteratePages, referenceScope, resolveReference } from "../response.js";
-export type GetBillingProfileResponse = BillingProfile;
+export type GetBillingProfileResponse = BillingProfileResponse;
 export type GetCurrentUsageResponse = CurrentUsage;
-export type GetInvoiceResponse = Invoice;
+export type GetInvoiceResponse = InvoiceResponse;
 export type ListCreditsQuery = {
   crn?: string;
   marker?: string;
@@ -13,8 +13,12 @@ export type ListCreditsQuery = {
 };
 export type ListCreditsResponse = CreditListResponse;
 export type ListCreditsItem = Credit;
-export type ListFiscalInvoicesQuery = { invoice?: string };
-export type ListFiscalInvoicesResponse = { fiscal_documents: FiscalInvoice[] };
+export type ListFiscalInvoicesQuery = {
+  invoice?: string;
+  limit?: number;
+  marker?: string;
+};
+export type ListFiscalInvoicesResponse = FiscalInvoiceListResponse;
 export type ListFiscalInvoicesItem = FiscalInvoice;
 export type ListInvoicesQuery = {
   crn?: string;
@@ -47,7 +51,8 @@ export type ListTransactionsQuery = {
 export type ListTransactionsResponse = TransactionListResponse;
 export type ListTransactionsItem = Transaction;
 export type UpdateBillingProfileBody = BillingProfileUpdateInput;
-export type UpdateBillingProfileResponse = BillingProfile;
+export type UpdateBillingProfileResponse = BillingProfileResponse;
+export type BillingProfileResponse = { billing_profile: BillingProfile };
 export type BillingProfile = {
   customer_type: "" | "individual" | "company";
   company_name: string;
@@ -85,6 +90,7 @@ export type UsageLine = {
   unit: string;
   amount: string;
 };
+export type InvoiceResponse = { invoice: Invoice };
 export type Invoice = {
   crn: string;
   id: string;
@@ -131,35 +137,28 @@ export type PaginationMeta = {
   marker?: string;
   has_more?: boolean;
 };
+export type FiscalInvoiceListResponse = {
+  fiscal_invoices: FiscalInvoice[];
+  meta: PaginationMeta;
+};
 export type FiscalInvoice = {
   id: string;
-  organization_id: string;
-  payment_id: string;
-  invoice_id?: string | null;
   amount: string;
-  status:
-    | "queued"
-    | "waiting_details"
-    | "retrying"
-    | "rejected"
-    | "issued"
-    | "review_required";
-  email_status: "pending" | "queued";
-  last_error?: string;
-  attempts: number;
-  number?: string;
-  verification_code?: string;
-  url?: string;
-  issued_at?: string;
-  requires_review: boolean;
+  number: string;
+  verification_code: string;
+  url: string;
+  issued_at: string | null;
   created_at: string;
+  crn: string;
+  payment: ResourceRef;
+  invoice: ResourceRef | null;
 };
 export type InvoiceListResponse = { invoices: Invoice[]; meta: PaginationMeta };
 export type PaymentListResponse = { payments: Payment[]; meta: PaginationMeta };
 export type Payment = {
   crn: string;
   id: string;
-  invoice: Invoice | null;
+  invoice: ResourceRef | null;
   amount: string;
   refunded_amount: string;
   disputed_amount: string;
@@ -199,7 +198,7 @@ export type Transaction = {
     | "credit_applied";
   amount: string;
   description?: string | null;
-  reference?: string | null;
+  reference: ResourceRef | null;
   created_at: string;
 };
 export type BillingProfileUpdateInput = {
@@ -309,11 +308,15 @@ const operations = {
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
-    queryEncoding: { invoice: { style: "form", explode: true } },
+    queryEncoding: {
+      invoice: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+    },
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "fiscal_documents",
+    itemsKey: "fiscal_invoices",
   },
   listInvoices: {
     id: "listInvoices",
@@ -462,8 +465,8 @@ export class BillingService {
     reference: string,
     scope: Omit<ListInvoicesQuery, "name" | "crn" | "marker"> = {},
     options: RequestOptions = {},
-  ): Promise<ApiResponse<GetInvoiceResponse>> {
-    return resolveReference<GetInvoiceResponse>(
+  ): Promise<ApiResponse<Invoice>> {
+    return resolveReference<Invoice>(
       reference,
       (id) => this.getInvoice(id, options),
       (filter) =>
@@ -472,6 +475,7 @@ export class BillingService {
           options,
         ),
       false,
+      "invoice",
     );
   }
   /** Download an invoice as a PDF statement */
@@ -513,7 +517,7 @@ export class BillingService {
       query.marker ?? "",
     );
   }
-  /** List fiscal invoice issuance and delivery status */
+  /** List issued fiscal invoices */
   listFiscalInvoices(
     query: ListFiscalInvoicesQuery = {},
     options: RequestOptions = {},
@@ -529,6 +533,15 @@ export class BillingService {
       undefined,
       query,
       options,
+    );
+  }
+  listFiscalInvoicesAll(
+    query: ListFiscalInvoicesQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListFiscalInvoicesItem> {
+    return iteratePages(
+      (marker) => this.listFiscalInvoices({ ...query, marker }, options),
+      query.marker ?? "",
     );
   }
   /** List invoices */

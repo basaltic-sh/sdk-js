@@ -325,8 +325,6 @@ export type InlinePolicyResponse = { inline_policy?: InlinePolicy };
 export type InlinePolicy = {
   crn: string;
   id?: string;
-  principal_id?: string;
-  principal_type?: "user" | "group";
   name?: string;
   document?: PolicyDocument;
   created_at?: string;
@@ -362,16 +360,7 @@ export type LinuxIdentity = {
   uid: number;
   gid: number;
 };
-export type PermissionBoundaryResponse = {
-  permission_boundary?: PermissionBoundary;
-};
-export type PermissionBoundary = {
-  principal_id?: string;
-  principal_type?: "user";
-  policy_id?: string;
-  policy_name?: string;
-  created_at?: string;
-};
+export type PermissionBoundaryResponse = { policy: Policy };
 export type AccountRoleAssignmentListResponse = {
   role_assignments?: AccountRoleAssignment[];
 };

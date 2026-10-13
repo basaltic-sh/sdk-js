@@ -5,7 +5,7 @@ import type { ApiResponse, Page } from "../response.js";
 import { iteratePages, referenceScope, resolveReference } from "../response.js";
 export type AttachListenerCertificateBody =
   AttachListenerCertificateRequestInput;
-export type AttachListenerCertificateResponse = ListenerResponse;
+export type AttachListenerCertificateResponse = ListenerCertificateResponse;
 export type AttachTargetBody = AttachTargetRequestInput;
 export type AttachTargetResponse = TargetResponse;
 export type CreateListenerBody = CreateListenerRequestInput;
@@ -21,12 +21,22 @@ export type GetLoadBalancerResponse = LoadBalancerResponse;
 export type GetRuleResponse = RuleResponse;
 export type GetTargetResponse = TargetResponse;
 export type GetTargetGroupResponse = TargetGroupResponse;
+export type ListListenerCertificatesResponse = ListenerCertificateListResponse;
+export type ListListenerCertificatesItem = Certificate;
 export type ListListenersQuery = { name?: string; crn?: string };
 export type ListListenersResponse = ListenerListResponse;
 export type ListListenersItem = Listener;
-export type ListLoadBalancerReplicasQuery = { name?: string; crn?: string };
-export type ListLoadBalancerReplicasResponse = LoadBalancerReplicasResponse;
-export type ListLoadBalancerReplicasItem = LoadBalancerReplica;
+export type ListLoadBalancerInstancesQuery = {
+  crn?: string;
+  limit?: number;
+  marker?: string;
+  name?: string;
+  current_state?: CurrentStateInput;
+  flavor?: string;
+  image?: string;
+};
+export type ListLoadBalancerInstancesResponse = LoadBalancerInstancesResponse;
+export type ListLoadBalancerInstancesItem = LoadBalancerInstance;
 export type ListLoadBalancersQuery = {
   name?: string;
   crn?: string;
@@ -63,50 +73,43 @@ export type AttachListenerCertificateRequestInput = {
   certificate: string;
   is_default?: boolean;
 };
-export type ListenerResponse = { listener?: Listener };
-export type Listener = {
-  crn: string;
-  id: string;
-  load_balancer_id: string;
-  protocol: "http" | "https" | "tcp" | "udp";
-  port: number;
-  certificates?: ListenerCertificate[];
-  default_target_group_id?: string;
-  exposure: "public_only" | "private_only" | "both";
-  tags: Tags;
-  created_at: string;
-  updated_at: string;
-};
-export type ListenerCertificate = {
-  id: string;
-  certificate_crn: string;
-  is_default: boolean;
-  created_at: string;
-  updated_at: string;
-};
-export type Tags = { [key: string]: string };
+export type ListenerCertificateResponse = { certificate: ResourceRef };
+export type ResourceRef = { id: string; crn: string; name?: string };
 export type AttachTargetRequestInput = { target: string; port?: number };
-export type TargetResponse = { target?: Target };
+export type TargetResponse = { target: Target };
 export type Target = {
   id: string;
-  target_group_id: string;
-  target_ref: string;
+  instance?: ResourceRef;
+  address?: string;
   port?: number;
   health: "initial" | "healthy" | "unhealthy" | "draining";
   last_seen_at?: string;
   created_at: string;
   updated_at: string;
-};
+} & ({ instance: unknown } | { address: unknown });
 export type CreateListenerRequestInput = {
   protocol: "http" | "https" | "tcp" | "udp";
   port: number;
-  certificates?: CreateListenerCertificateInput[];
+  certificates?: string[];
   default_target_group?: string;
   exposure?: "public_only" | "private_only" | "both";
   tags?: TagsInput;
 };
-export type CreateListenerCertificateInput = { certificate: string };
 export type TagsInput = { [key: string]: string };
+export type ListenerResponse = { listener: Listener };
+export type Listener = {
+  crn: string;
+  id: string;
+  protocol: "http" | "https" | "tcp" | "udp";
+  port: number;
+  exposure: "public_only" | "private_only" | "both";
+  tags: Tags;
+  created_at: string;
+  updated_at: string;
+  default_certificate: ResourceRef | null;
+  default_target_group: ResourceRef | null;
+};
+export type Tags = { [key: string]: string };
 export type CreateLoadBalancerRequestInput = {
   desired_count?: number;
   min_count?: number;
@@ -115,10 +118,9 @@ export type CreateLoadBalancerRequestInput = {
   name: string;
   type: "application" | "network";
   vpc: string;
-  subnet: string;
+  subnets: string[];
   flavor: string;
   replica_count?: number;
-  floating_ip?: string;
   floating_ips?: string[];
   security_groups: string[];
   tags?: TagsInput;
@@ -145,7 +147,7 @@ export type ScalingMetricInput = {
   window_seconds?: number;
   max_age_seconds?: number;
 };
-export type LoadBalancerResponse = { load_balancer?: LoadBalancer };
+export type LoadBalancerResponse = { load_balancer: LoadBalancer };
 export type LoadBalancer = {
   rollout_surge?: boolean;
   desired_count: number;
@@ -155,23 +157,18 @@ export type LoadBalancer = {
   autoscaling_status?: AutoscalingStatus;
   id: string;
   crn: string;
-  account_id: string;
   name: string;
   type: "application" | "network";
   status: "provisioning" | "active" | "error" | "deleting";
   faults: Fault[];
-  subnet: Subnet | null;
-  flavor_id: string;
+  subnets: ResourceRef[];
   replica_count: number;
-  internal_ipv4?: string;
-  internal_ipv6?: string;
-  public_ipv6?: string;
-  floating_ip_id?: string;
-  floating_ips: FloatingIp[];
+  floating_ips: FloatingIPRef[];
   dns_name?: string;
   tags: Tags;
   created_at: string;
   updated_at: string;
+  flavor: ResourceRef;
 };
 export type AutoscalingPolicy = {
   enabled: boolean;
@@ -221,74 +218,11 @@ export type Fault = {
   last_at: string;
   occurrences: number;
 };
-export type Subnet = {
+export type FloatingIPRef = {
   id: string;
   crn: string;
-  vpc: Vpc;
-  route_table: RouteTableSummary;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  gateway_ipv4: string;
-  cidr_ipv6?: string | null;
-  gateway_ipv6?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type Vpc = {
-  id: string;
-  crn: string;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  cidr_ipv6?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type RouteTableSummary = {
-  id: string;
-  crn: string;
-  name: string;
-} | null;
-export type FloatingIp = {
-  id: string;
-  crn: string;
-  description?: string;
-  family: IpFamily;
-  attached_to: string | null;
-  members: FloatingIpMember[];
-  tags: { [key: string]: string };
-  health_check?: FloatingIpHealthCheck;
-  created_at: string;
-  updated_at: string;
-  address: string;
   visibility: "public" | "private";
-  subnet_id?: string | null;
-  vpc_id?: string;
-};
-export type IpFamily = "ipv4" | "ipv6";
-export type FloatingIpMember = {
-  interface: {
-    id: string;
-    crn: string;
-    instance: { id: string; crn: string; name: string } | null;
-  } | null;
-  health: "unknown" | "healthy" | "unhealthy";
-  reason: "unprobed" | "booting" | "probe_failed" | "passing";
-  created_at: string;
-  address_id?: string | null;
-};
-export type FloatingIpHealthCheck = {
-  protocol: "tcp" | "http" | "https";
-  path?: string;
-  port: number;
-  interval_sec: number;
-  timeout_sec: number;
-  healthy_threshold: number;
-  unhealthy_threshold: number;
-  matcher?: string;
+  address: string;
 };
 export type CreateRuleRequestInput = {
   priority: number;
@@ -301,14 +235,13 @@ export type RuleConditionInput = {
   name?: string;
   values: string[];
 };
-export type RuleResponse = { rule?: Rule };
+export type RuleResponse = { rule: Rule };
 export type Rule = {
   crn: string;
   id: string;
-  listener_id: string;
   priority: number;
   conditions: RuleCondition[];
-  target_group_id: string;
+  target_group: ResourceRef;
   created_at: string;
   updated_at: string;
 };
@@ -346,11 +279,10 @@ export type SessionAffinityInput = {
   cookie_name?: string;
   duration_sec?: number;
 };
-export type TargetGroupResponse = { target_group?: TargetGroup };
+export type TargetGroupResponse = { target_group: TargetGroup };
 export type TargetGroup = {
   id: string;
   crn: string;
-  account_id: string;
   name: string;
   protocol: "http" | "https" | "tcp" | "udp";
   target_type: "ip" | "instance" | "function";
@@ -359,7 +291,7 @@ export type TargetGroup = {
   proxy_protocol: boolean;
   session_affinity: SessionAffinity;
   target_mode: "static" | "pool";
-  instance_pool_id?: string;
+  instance_pool?: ResourceRef;
   tags: Tags;
   created_at: string;
   updated_at: string;
@@ -380,28 +312,40 @@ export type SessionAffinity = {
   cookie_name?: string;
   duration_sec?: number;
 };
-export type ListenerListResponse = { listeners?: Listener[] };
-export type LoadBalancerReplicasResponse = { replicas?: LoadBalancerReplica[] };
-export type LoadBalancerReplica = {
-  retirement?: Retirement;
-  instance_id: string;
-  replica_index: number;
-  created_at: string;
-  flavor_id: string;
-  status: "initializing" | "healthy" | "unhealthy" | "draining";
-  proxy_ok: boolean;
-  agent_version?: string;
-  last_seen?: string;
+export type ListenerCertificateListResponse = {
+  certificates: Certificate[];
+  meta: PaginationMeta;
 };
-export type Retirement = {
-  requested_at: string;
-  drain_seconds: number;
-  agent_acknowledged_at?: string;
-  drain_until?: string;
+export type Certificate = {
+  id?: string;
+  crn?: string;
+  name?: string;
+  domains?: string[];
+  status?: CertificateStatus;
+  source?: CertificateSource;
+  key_algorithm?: CertificateKeyAlgorithm;
+  challenges?: CertificateChallenge[];
+  certificate_pem?: string;
+  chain_pem?: string;
+  fingerprint?: string;
+  issued_at?: string;
+  expires_at?: string;
+  faults: Fault[];
+  tags?: Tags;
 };
-export type LoadBalancerListResponse = {
-  load_balancers?: LoadBalancer[];
-  meta?: PaginationMeta;
+export type CertificateStatus =
+  "pending_dns" | "pending" | "active" | "error" | "expired" | "revoked";
+export type CertificateSource = "acme" | "uploaded";
+export type CertificateKeyAlgorithm =
+  "ecdsa-p256" | "ecdsa-p384" | "rsa-2048" | "rsa-4096";
+export type CertificateChallenge = {
+  domain?: string;
+  cname_record_name?: string;
+  expected_cname?: string;
+  our_dns?: boolean;
+  verified?: boolean;
+  verified_at?: string;
+  faults: Fault[];
 };
 export type PaginationMeta = {
   total?: number;
@@ -409,18 +353,91 @@ export type PaginationMeta = {
   marker?: string;
   has_more?: boolean;
 };
-export type RuleListResponse = { rules?: Rule[] };
-export type TargetGroupListResponse = {
-  target_groups?: TargetGroup[];
-  meta?: PaginationMeta;
+export type ListenerListResponse = {
+  listeners: Listener[];
+  meta: PaginationMeta;
 };
-export type TargetListResponse = { targets?: Target[] };
+export type CurrentStateInput =
+  | "pending"
+  | "building"
+  | "running"
+  | "stopping"
+  | "stopped"
+  | "rebooting"
+  | "migrating"
+  | "deleting"
+  | "deleted"
+  | "error"
+  | "crashed"
+  | "paused"
+  | "suspended";
+export type LoadBalancerInstancesResponse = {
+  instances: LoadBalancerInstance[];
+  meta: PaginationMeta;
+};
+export type LoadBalancerInstance = Instance & {
+  retirement?: Retirement;
+  status: "initializing" | "healthy" | "unhealthy" | "draining";
+  proxy_ok: boolean;
+  agent_version?: string;
+  last_seen?: string;
+};
+export type Instance = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  task_state?: string | null;
+  flavor: ResourceRef;
+  image: ResourceRef | null;
+  user_data?: string;
+  iam_role: ResourceRef | null;
+  metadata?: Metadata;
+  tags?: Tags;
+  faults: Fault[];
+  created_at: string;
+  updated_at: string;
+  launched_at?: string | null;
+  terminated_at?: string | null;
+  desired_state: "running" | "stopped" | "deleted";
+  current_state: CurrentState;
+};
+export type Metadata = { [key: string]: string };
+export type CurrentState =
+  | "pending"
+  | "building"
+  | "running"
+  | "stopping"
+  | "stopped"
+  | "rebooting"
+  | "migrating"
+  | "deleting"
+  | "deleted"
+  | "error"
+  | "crashed"
+  | "paused"
+  | "suspended";
+export type Retirement = {
+  requested_at: string;
+  drain_seconds: number;
+  agent_acknowledged_at?: string;
+  drain_until?: string;
+};
+export type LoadBalancerListResponse = {
+  load_balancers: LoadBalancer[];
+  meta: PaginationMeta;
+};
+export type RuleListResponse = { rules: Rule[]; meta: PaginationMeta };
+export type TargetGroupListResponse = {
+  target_groups: TargetGroup[];
+  meta: PaginationMeta;
+};
+export type TargetListResponse = { targets: Target[]; meta: PaginationMeta };
 export type UpdateListenerRequestInput = {
-  certificate?: string;
-  default_target_group?: string;
-  clear_default_target_group?: boolean;
+  default_target_group?: string | null;
   exposure?: "public_only" | "private_only" | "both";
   tags?: TagsInput;
+  default_certificate?: string;
 };
 export type UpdateLoadBalancerRequestInput = {
   desired_count?: number;
@@ -665,6 +682,19 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
+  listListenerCertificates: {
+    id: "listListenerCertificates",
+    method: "GET",
+    path: "/v1/load-balancers/{id}/listeners/{listener_id}/certificates",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "certificates",
+  },
   listListeners: {
     id: "listListeners",
     method: "GET",
@@ -681,21 +711,26 @@ const operations = {
     accept: "application/json",
     itemsKey: "listeners",
   },
-  listLoadBalancerReplicas: {
-    id: "listLoadBalancerReplicas",
+  listLoadBalancerInstances: {
+    id: "listLoadBalancerInstances",
     method: "GET",
-    path: "/v1/load-balancers/{id}/replicas",
+    path: "/v1/load-balancers/{id}/instances",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {
-      name: { style: "form", explode: true },
       crn: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+      name: { style: "form", explode: true },
+      current_state: { style: "form", explode: true },
+      flavor: { style: "form", explode: true },
+      image: { style: "form", explode: true },
     },
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "replicas",
+    itemsKey: "instances",
   },
   listLoadBalancers: {
     id: "listLoadBalancers",
@@ -1172,6 +1207,27 @@ export class LoadbalancerService {
       "target_group",
     );
   }
+  /** List listener certificates */
+  listListenerCertificates(
+    id: string,
+    listener_id: string,
+    options: RequestOptions = {},
+  ): Promise<
+    Page<ListListenerCertificatesResponse, ListListenerCertificatesItem>
+  > {
+    return this.transport.page<
+      ListListenerCertificatesResponse,
+      ListListenerCertificatesItem
+    >(
+      "loadbalancer",
+      "https://loadbalancer.{region}.basaltic.sh",
+      operations.listListenerCertificates,
+      { id, listener_id },
+      undefined,
+      {},
+      options,
+    );
+  }
   /** List this load balancer's listeners */
   listListeners(
     id: string,
@@ -1188,25 +1244,36 @@ export class LoadbalancerService {
       options,
     );
   }
-  /** List the LB's instance replicas with live health */
-  listLoadBalancerReplicas(
+  /** List a load balancer's instances */
+  listLoadBalancerInstances(
     id: string,
-    query: ListLoadBalancerReplicasQuery = {},
+    query: ListLoadBalancerInstancesQuery = {},
     options: RequestOptions = {},
   ): Promise<
-    Page<ListLoadBalancerReplicasResponse, ListLoadBalancerReplicasItem>
+    Page<ListLoadBalancerInstancesResponse, ListLoadBalancerInstancesItem>
   > {
     return this.transport.page<
-      ListLoadBalancerReplicasResponse,
-      ListLoadBalancerReplicasItem
+      ListLoadBalancerInstancesResponse,
+      ListLoadBalancerInstancesItem
     >(
       "loadbalancer",
       "https://loadbalancer.{region}.basaltic.sh",
-      operations.listLoadBalancerReplicas,
+      operations.listLoadBalancerInstances,
       { id },
       undefined,
       query,
       options,
+    );
+  }
+  listLoadBalancerInstancesAll(
+    id: string,
+    query: ListLoadBalancerInstancesQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListLoadBalancerInstancesItem> {
+    return iteratePages(
+      (marker) =>
+        this.listLoadBalancerInstances(id, { ...query, marker }, options),
+      query.marker ?? "",
     );
   }
   /** List load balancers */
@@ -1293,7 +1360,7 @@ export class LoadbalancerService {
       options,
     );
   }
-  /** Patch a listener (rotate cert, change default target group) */
+  /** Update a listener */
   updateListener(
     id: string,
     listener_id: string,

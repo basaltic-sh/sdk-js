@@ -7,17 +7,8 @@ import type {
 import type { RequestOptions } from "../config.js";
 import type { ApiResponse, Page } from "../response.js";
 import { iteratePages, referenceScope, resolveReference } from "../response.js";
-export type AttachInstanceNICBody = { interface: string };
-export type AttachInstanceNICResponse = {
-  attachment?: {
-    interface_id?: string;
-    mac?: string;
-    boot_index?: number;
-    external?: boolean;
-    restart_required?: boolean;
-    addresses?: InterfaceAddress[];
-  };
-};
+export type AttachInstanceInterfaceBody = { interface: string };
+export type AttachInstanceInterfaceResponse = InstanceInterfaceResponse;
 export type AttachInstancePoolFloatingIpBody =
   InstancePoolFloatingIpAttachRequestInput;
 export type AttachInstancePoolFloatingIpResponse =
@@ -28,22 +19,20 @@ export type AttachInstanceVolumeBody = {
   mount_path?: string;
   fstype?: "ext4" | "xfs";
 };
-export type AttachInstanceVolumeResponse = {
-  attachment?: { instance_id?: string; volume_id?: string; device?: string };
-};
+export type AttachInstanceVolumeResponse = InstanceVolumeResponse;
 export type CreateImageBody = ImageCreateRequestInput;
 export type CreateImageResponse = ImageResponse;
 export type CreateInstanceBody = InstanceCreateRequestInput;
-export type CreateInstanceResponse = { instance?: Instance };
+export type CreateInstanceResponse = { instance: Instance };
 export type CreateInstancePoolBody = InstancePoolCreateRequestInput;
 export type CreateInstancePoolResponse = InstancePoolResponse;
 export type CreateSerialConsoleTicketResponse = SerialConsoleTicket;
 export type DeleteImageResponse = ImageResponse;
 export type GetConsoleOutputQuery = { max_bytes?: number };
 export type GetConsoleOutputResponse = { output: string; truncated: boolean };
-export type GetFlavorResponse = { flavor?: Flavor };
+export type GetFlavorResponse = { flavor: Flavor };
 export type GetImageResponse = ImageResponse;
-export type GetInstanceResponse = { instance?: Instance };
+export type GetInstanceResponse = { instance: Instance };
 export type GetInstancePoolResponse = InstancePoolResponse;
 export type ListFlavorsQuery = {
   name?: string;
@@ -74,31 +63,9 @@ export type ListImagesQuery = {
 };
 export type ListImagesResponse = ImageListResponse;
 export type ListImagesItem = Image;
-export type ListInstanceNICsQuery = { name?: string; crn?: string };
-export type ListInstanceNICsResponse = {
-  nics?: {
-    interface_id: string;
-    boot_index: number;
-    primary: boolean;
-    external: boolean;
-    name?: string;
-    mac?: string;
-    subnet: Subnet | null;
-    addresses: InterfaceAddress[];
-    routed_prefixes: RoutedPrefix[];
-  }[];
-};
-export type ListInstanceNICsItem = {
-  interface_id: string;
-  boot_index: number;
-  primary: boolean;
-  external: boolean;
-  name?: string;
-  mac?: string;
-  subnet: Subnet | null;
-  addresses: InterfaceAddress[];
-  routed_prefixes: RoutedPrefix[];
-};
+export type ListInstanceInterfacesQuery = { name?: string; crn?: string };
+export type ListInstanceInterfacesResponse = InstanceInterfaceListResponse;
+export type ListInstanceInterfacesItem = AttachedInterface;
 export type ListInstancePoolFloatingIpsQuery = {
   name?: string;
   crn?: string;
@@ -116,36 +83,8 @@ export type ListInstancePoolsQuery = {
 export type ListInstancePoolsResponse = InstancePoolListResponse;
 export type ListInstancePoolsItem = InstancePool;
 export type ListInstanceVolumesQuery = { name?: string; crn?: string };
-export type ListInstanceVolumesResponse = {
-  attachments?: {
-    volume_id?: string;
-    device?: string;
-    boot_index?: number;
-    delete_on_termination?: boolean;
-    mount_path?: string;
-    fstype?: "ext4" | "xfs";
-    name?: string;
-    volume_type?: string;
-    size_gb?: number;
-    status?: string;
-    bootable?: boolean;
-    mount?: VolumeMount;
-  }[];
-};
-export type ListInstanceVolumesItem = {
-  volume_id?: string;
-  device?: string;
-  boot_index?: number;
-  delete_on_termination?: boolean;
-  mount_path?: string;
-  fstype?: "ext4" | "xfs";
-  name?: string;
-  volume_type?: string;
-  size_gb?: number;
-  status?: string;
-  bootable?: boolean;
-  mount?: VolumeMount;
-};
+export type ListInstanceVolumesResponse = InstanceVolumeListResponse;
+export type ListInstanceVolumesItem = AttachedVolume;
 export type ListInstancesQuery = {
   crn?: string;
   limit?: number;
@@ -180,56 +119,50 @@ export type StartSerialConsoleQuery = { backlog_bytes?: number };
 export type UpdateImageBody = ImageUpdateRequestInput;
 export type UpdateImageResponse = ImageResponse;
 export type UpdateInstanceBody = InstanceUpdateRequestInput;
-export type UpdateInstanceResponse = { instance?: Instance };
+export type UpdateInstanceResponse = { instance: Instance };
 export type UpdateInstancePoolBody = InstancePoolUpdateRequestInput;
 export type UpdateInstancePoolResponse = InstancePoolResponse;
 export type UpdateInstanceVolumeAttachmentBody = {
   delete_on_termination: boolean;
 };
-export type InterfaceAddress = {
-  id: string;
-  family: "ipv4" | "ipv6";
-  address: string;
-  prefix: string;
+export type InstanceInterfaceResponse = { interface: AttachedInterface };
+export type AttachedInterface = Interface & {
+  boot_index: number;
   primary: boolean;
-  floating_ips: AddressFloatingIp[];
+  external: boolean;
+  restart_required?: boolean;
 };
-export type AddressFloatingIp = {
+export type Interface = {
   id: string;
   crn: string;
-  visibility: "public" | "private";
-  address: string;
+  subnet: ResourceRef;
+  name: string;
+  description?: string;
+  mac: string;
+  attached_to: ResourceRef | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
 };
+export type ResourceRef = { id: string; crn: string; name?: string };
 export type InstancePoolFloatingIpAttachRequestInput = { floating_ip: string };
-export type InstancePoolFloatingIpResponse = { floating_ip?: FloatingIp };
+export type InstancePoolFloatingIpResponse = { floating_ip: FloatingIp };
 export type FloatingIp = {
   id: string;
   crn: string;
   description?: string;
   family: IpFamily;
-  attached_to: string | null;
-  members: FloatingIpMember[];
+  attached_to: ResourceRef | null;
   tags: { [key: string]: string };
   health_check?: FloatingIpHealthCheck;
   created_at: string;
   updated_at: string;
   address: string;
   visibility: "public" | "private";
-  subnet_id?: string | null;
-  vpc_id?: string;
+  subnet: ResourceRef | null;
+  vpc: ResourceRef | null;
 };
 export type IpFamily = "ipv4" | "ipv6";
-export type FloatingIpMember = {
-  interface: {
-    id: string;
-    crn: string;
-    instance: { id: string; crn: string; name: string } | null;
-  } | null;
-  health: "unknown" | "healthy" | "unhealthy";
-  reason: "unprobed" | "booting" | "probe_failed" | "passing";
-  created_at: string;
-  address_id?: string | null;
-};
 export type FloatingIpHealthCheck = {
   protocol: "tcp" | "http" | "https";
   path?: string;
@@ -239,6 +172,81 @@ export type FloatingIpHealthCheck = {
   healthy_threshold: number;
   unhealthy_threshold: number;
   matcher?: string;
+};
+export type InstanceVolumeResponse = { volume: AttachedVolume };
+export type AttachedVolume = Volume & {
+  device: string;
+  boot_index: number;
+  delete_on_termination: boolean;
+  mount_path?: string;
+  fstype?: "ext4" | "xfs";
+  mount?: VolumeMount;
+};
+export type Volume = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  tags: Tags;
+  volume_type: VolumeTypeName;
+  size_gb: number;
+  performance: VolumePerformance;
+  included_io_limits: IncludedIOLimits;
+  status: VolumeStatus;
+  bootable: boolean;
+  faults: Fault[];
+  created_at: string;
+  updated_at: string;
+  source_image: ResourceRef | null;
+  source_snapshot: ResourceRef | null;
+};
+export type Tags = { [key: string]: string };
+export type VolumeTypeName = "hdd" | "ssd" | "nvme";
+export type VolumePerformance = {
+  requested: IncludedIOLimits;
+  applied: IncludedIOLimits;
+};
+export type IncludedIOLimits = {
+  iops: number;
+  bytes_per_sec: number;
+  burst_iops: number;
+  burst_bytes_per_sec: number;
+  burst_seconds: number;
+};
+export type VolumeStatus =
+  | "creating"
+  | "available"
+  | "in_use"
+  | "extending"
+  | "updating"
+  | "deleting"
+  | "error";
+export type Fault = {
+  code: string;
+  severity: "error" | "warning";
+  message: string;
+  details: { [key: string]: unknown } | null;
+  first_at: string;
+  last_at: string;
+  occurrences: number;
+};
+export type VolumeMount = {
+  state: "unknown" | "pending" | "mounted" | "failed";
+  code?:
+    | "unsafe_serial"
+    | "device_absent"
+    | "probe_failed"
+    | "signatures_no_filesystem"
+    | "unsupported_fstype"
+    | "mkfs_failed"
+    | "unsafe_mount_path"
+    | "mkdir_failed"
+    | "mount_failed"
+    | "fstab_write_failed"
+    | "unknown_error";
+  message?: string;
+  since?: string;
+  reported_at?: string;
 };
 export type ImageCreateRequestInput = {
   name: string;
@@ -296,16 +304,6 @@ export type Image = {
   created_at: string;
   updated_at: string;
 };
-export type Fault = {
-  code: string;
-  severity: "error" | "warning";
-  message: string;
-  details: { [key: string]: unknown } | null;
-  first_at: string;
-  last_at: string;
-  occurrences: number;
-};
-export type Tags = { [key: string]: string };
 export type InstanceCreateRequestInput = {
   name: string;
   description?: string;
@@ -356,42 +354,25 @@ export type SnapshotRetentionCountInput = number;
 export type SnapshotRetentionDaysInput = number;
 export type MetadataInput = { [key: string]: string };
 export type Instance = {
-  id?: string;
-  crn?: string;
-  name?: string;
+  id: string;
+  crn: string;
+  name: string;
   description?: string;
   task_state?: string | null;
-  flavor?: Flavor;
-  image?: Image;
+  flavor: ResourceRef;
+  image: ResourceRef | null;
   user_data?: string;
-  iam_role?: InstanceRole;
+  iam_role: ResourceRef | null;
   metadata?: Metadata;
   tags?: Tags;
   faults: Fault[];
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
   launched_at?: string | null;
   terminated_at?: string | null;
-  desired_state?: "running" | "stopped" | "deleted";
-  current_state?: CurrentState;
+  desired_state: "running" | "stopped" | "deleted";
+  current_state: CurrentState;
 };
-export type Flavor = {
-  id?: string;
-  crn?: string;
-  name?: string;
-  description?: string;
-  vcpus?: number;
-  ram_mb?: number;
-  class?: "shared" | "dedicated";
-  family?: "general" | "loadbalancer" | "database";
-  net_mbps?: number;
-  cpu_baseline_pct?: number;
-  cpu_burst_pct?: number;
-  status?: "active" | "disabled";
-  created_at?: string;
-  updated_at?: string;
-};
-export type InstanceRole = { id: string; crn: string; name: string };
 export type Metadata = { [key: string]: string };
 export type CurrentState =
   | "pending"
@@ -408,6 +389,7 @@ export type CurrentState =
   | "paused"
   | "suspended";
 export type InstancePoolCreateRequestInput = {
+  subnets: string[];
   autoscaling?: AutoscalingPolicyInput;
   name: string;
   description?: string;
@@ -443,7 +425,9 @@ export type InstancePoolTemplateRequestInput = {
   flavor: string;
   architecture?: string;
   image?: string;
-  networks: NetworkConfigInput[];
+  addresses?: AddressRequestInput[];
+  security_groups?: string[];
+  floating_ip_assignment?: "none" | "ipv4" | "ipv6" | "dual_stack" | "auto";
   user_data?: string;
   metadata?: MetadataInput;
   tags?: TagsInput;
@@ -459,8 +443,10 @@ export type InstanceVolumeInput = {
   fstype?: string;
   delete_on_termination?: boolean;
 };
-export type InstancePoolResponse = { instance_pool?: InstancePool };
+export type InstancePoolResponse = { instance_pool: InstancePool };
 export type InstancePool = {
+  subnets: ResourceRef[];
+  vpc: ResourceRef | null;
   autoscaling?: AutoscalingPolicy;
   autoscaling_status?: AutoscalingStatus;
   rollout_surge?: boolean;
@@ -529,53 +515,17 @@ export type Retirement = {
   drain_until?: string;
 };
 export type InstancePoolTemplate = {
-  flavor_id?: string;
-  image_id?: string;
-  networks?: NetworkConfigResponse[];
+  addresses?: AddressRequest[];
+  security_groups: ResourceRef[];
+  floating_ip_assignment: "none" | "ipv4" | "ipv6" | "dual_stack" | "auto";
   user_data?: string;
   metadata?: Metadata;
   tags?: Tags;
-  iam_role?: InstanceRole;
+  iam_role: ResourceRef | null;
   volumes?: InstanceVolume[];
+  flavor: ResourceRef;
+  image: ResourceRef | null;
 };
-export type NetworkConfigResponse = {
-  subnet: Subnet | null;
-  mac?: string;
-  security_group_ids?: string[];
-  floating_ip_assignment?: "none" | "ipv4" | "ipv6" | "dual_stack" | "auto";
-  addresses?: AddressRequest[];
-};
-export type Subnet = {
-  id: string;
-  crn: string;
-  vpc: Vpc;
-  route_table: RouteTableSummary;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  gateway_ipv4: string;
-  cidr_ipv6?: string | null;
-  gateway_ipv6?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type Vpc = {
-  id: string;
-  crn: string;
-  name: string;
-  description?: string;
-  cidr_ipv4: string;
-  cidr_ipv6?: string | null;
-  tags: { [key: string]: string };
-  created_at: string;
-  updated_at: string;
-};
-export type RouteTableSummary = {
-  id: string;
-  crn: string;
-  name: string;
-} | null;
 export type AddressRequest = { family: "ipv4" | "ipv6"; address?: string };
 export type InstanceVolume = {
   boot?: boolean;
@@ -595,7 +545,27 @@ export type SerialConsoleTicket = {
   expires_at: string;
   expires_in: number;
 };
-export type FlavorListResponse = { flavors?: Flavor[] };
+export type Flavor = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  vcpus: number;
+  ram_mb: number;
+  class: "shared" | "dedicated";
+  family: "general" | "loadbalancer" | "database";
+  net_mbps?: number;
+  cpu_baseline_pct?: number;
+  cpu_burst_pct?: number;
+  status: "active" | "unavailable";
+};
+export type FlavorListResponse = { flavors: Flavor[]; meta: PaginationMeta };
+export type PaginationMeta = {
+  total?: number;
+  limit?: number;
+  marker?: string;
+  has_more?: boolean;
+};
 export type ImageCatalogResponse = {
   categories: ImageCatalogCategory[];
   meta: PaginationMeta;
@@ -612,44 +582,22 @@ export type CatalogImage = {
   min_ram_mb: number;
   eol_date?: string;
 };
-export type PaginationMeta = {
-  total?: number;
-  limit?: number;
-  marker?: string;
-  has_more?: boolean;
-};
 export type ImageListResponse = { images: Image[]; meta?: PaginationMeta };
-export type RoutedPrefix = {
-  id: string;
-  pool_id: string;
-  family: "ipv4";
-  prefix: string;
+export type InstanceInterfaceListResponse = {
+  interfaces: AttachedInterface[];
+  meta: PaginationMeta;
 };
 export type FloatingIpListResponse = {
   floating_ips: FloatingIp[];
   meta: PaginationMeta;
 };
 export type InstancePoolListResponse = {
-  instance_pools?: InstancePool[];
-  meta?: PaginationMeta;
+  instance_pools: InstancePool[];
+  meta: PaginationMeta;
 };
-export type VolumeMount = {
-  state: "unknown" | "pending" | "mounted" | "failed";
-  code?:
-    | "unsafe_serial"
-    | "device_absent"
-    | "probe_failed"
-    | "signatures_no_filesystem"
-    | "unsupported_fstype"
-    | "mkfs_failed"
-    | "unsafe_mount_path"
-    | "mkdir_failed"
-    | "mount_failed"
-    | "fstab_write_failed"
-    | "unknown_error";
-  message?: string;
-  since?: string;
-  reported_at?: string;
+export type InstanceVolumeListResponse = {
+  volumes: AttachedVolume[];
+  meta: PaginationMeta;
 };
 export type CurrentStateInput =
   | "pending"
@@ -666,8 +614,8 @@ export type CurrentStateInput =
   | "paused"
   | "suspended";
 export type InstanceListResponse = {
-  instances?: Instance[];
-  meta?: PaginationMeta;
+  instances: Instance[];
+  meta: PaginationMeta;
 };
 export type InstanceRebootRequestInput = { hard?: boolean };
 export type ImageUpdateRequestInput = {
@@ -684,6 +632,7 @@ export type InstanceUpdateRequestInput = {
   tags?: TagsInput;
 };
 export type InstancePoolUpdateRequestInput = {
+  subnets?: string[];
   autoscaling?: AutoscalingPolicyInput;
   description?: string;
   tags?: TagsInput;
@@ -693,10 +642,10 @@ export type InstancePoolUpdateRequestInput = {
   template?: InstancePoolTemplateRequestInput;
 };
 const operations = {
-  attachInstanceNIC: {
-    id: "attachInstanceNIC",
+  attachInstanceInterface: {
+    id: "attachInstanceInterface",
     method: "POST",
-    path: "/v1/instances/{instance_id}/nics",
+    path: "/v1/instances/{instance_id}/interfaces",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -813,10 +762,10 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
-  detachInstanceNIC: {
-    id: "detachInstanceNIC",
+  detachInstanceInterface: {
+    id: "detachInstanceInterface",
     method: "DELETE",
-    path: "/v1/instances/{instance_id}/nics/{interface_id}",
+    path: "/v1/instances/{instance_id}/interfaces/{interface_id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -979,10 +928,10 @@ const operations = {
     accept: "application/json",
     itemsKey: "images",
   },
-  listInstanceNICs: {
-    id: "listInstanceNICs",
+  listInstanceInterfaces: {
+    id: "listInstanceInterfaces",
     method: "GET",
-    path: "/v1/instances/{instance_id}/nics",
+    path: "/v1/instances/{instance_id}/interfaces",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -993,7 +942,7 @@ const operations = {
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "nics",
+    itemsKey: "interfaces",
   },
   listInstancePoolFloatingIps: {
     id: "listInstancePoolFloatingIps",
@@ -1045,7 +994,7 @@ const operations = {
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "attachments",
+    itemsKey: "volumes",
   },
   listInstances: {
     id: "listInstances",
@@ -1225,15 +1174,15 @@ const operations = {
 export class ComputeService {
   constructor(private readonly transport: Transport) {}
   /** Attach an existing NIC to an instance */
-  attachInstanceNIC(
+  attachInstanceInterface(
     instance_id: string,
-    body: AttachInstanceNICBody,
+    body: AttachInstanceInterfaceBody,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<AttachInstanceNICResponse>> {
-    return this.transport.json<AttachInstanceNICResponse>(
+  ): Promise<ApiResponse<AttachInstanceInterfaceResponse>> {
+    return this.transport.json<AttachInstanceInterfaceResponse>(
       "compute",
       "https://compute.{region}.basaltic.sh",
-      operations.attachInstanceNIC,
+      operations.attachInstanceInterface,
       { instance_id },
       body,
       {},
@@ -1377,8 +1326,8 @@ export class ComputeService {
       options,
     );
   }
-  /** Detach a NIC from a running instance */
-  detachInstanceNIC(
+  /** Detach an interface from a running instance */
+  detachInstanceInterface(
     instance_id: string,
     interface_id: string,
     options: RequestOptions = {},
@@ -1386,7 +1335,7 @@ export class ComputeService {
     return this.transport.discard(
       "compute",
       "https://compute.{region}.basaltic.sh",
-      operations.detachInstanceNIC,
+      operations.detachInstanceInterface,
       { instance_id, interface_id },
       undefined,
       {},
@@ -1645,15 +1594,18 @@ export class ComputeService {
     );
   }
   /** List the instance's network interfaces */
-  listInstanceNICs(
+  listInstanceInterfaces(
     instance_id: string,
-    query: ListInstanceNICsQuery = {},
+    query: ListInstanceInterfacesQuery = {},
     options: RequestOptions = {},
-  ): Promise<Page<ListInstanceNICsResponse, ListInstanceNICsItem>> {
-    return this.transport.page<ListInstanceNICsResponse, ListInstanceNICsItem>(
+  ): Promise<Page<ListInstanceInterfacesResponse, ListInstanceInterfacesItem>> {
+    return this.transport.page<
+      ListInstanceInterfacesResponse,
+      ListInstanceInterfacesItem
+    >(
       "compute",
       "https://compute.{region}.basaltic.sh",
-      operations.listInstanceNICs,
+      operations.listInstanceInterfaces,
       { instance_id },
       undefined,
       query,

@@ -12,6 +12,8 @@ export type AttachRolePolicyBody = RolePolicyAttachRequestInput;
 export type AttachServiceAccountPolicyBody = PolicyAttachRequestInput;
 export type AuthorizeOAuthClientBody = OAuthAuthorizeRequestInput;
 export type AuthorizeOAuthClientResponse = OAuthAuthorizeResponse;
+export type CreateOIDCProviderBody = OIDCProviderCreateRequestInput;
+export type CreateOIDCProviderResponse = OIDCProviderResponse;
 export type CreatePersonalSSHKeyBody = SSHKeyCreateRequestInput;
 export type CreatePersonalSSHKeyResponse = { ssh_key: SSHKey };
 export type CreatePolicyBody = PolicyCreateRequestInput;
@@ -26,6 +28,7 @@ export type CreateServiceAccountSSHKeyBody = SSHKeyCreateRequestInput;
 export type CreateServiceAccountSSHKeyResponse = { ssh_key: SSHKey };
 export type GetOAuthTokenBody = OAuthTokenRequestInput;
 export type GetOAuthTokenResponse = OAuthTokenResponse;
+export type GetOIDCProviderResponse = OIDCProviderResponse;
 export type GetPersonalLinuxIdentityResponse = {
   linux_identity: LinuxIdentity;
 };
@@ -41,6 +44,14 @@ export type GetServiceAccountLinuxIdentityResponse = {
 };
 export type GetServiceAccountPermissionBoundaryResponse =
   PermissionBoundaryResponse;
+export type ListOIDCProvidersQuery = {
+  name?: string;
+  crn?: string;
+  limit?: number;
+  marker?: string;
+};
+export type ListOIDCProvidersResponse = OIDCProviderListResponse;
+export type ListOIDCProvidersItem = OIDCProvider;
 export type ListPersonalSSHKeysResponse = { ssh_keys: SSHKey[] };
 export type ListPersonalSSHKeysItem = SSHKey;
 export type ListPoliciesQuery = {
@@ -68,9 +79,6 @@ export type ListPolicyServiceAccountsQuery = {
 export type ListPolicyServiceAccountsResponse =
   PolicyServiceAccountsListResponse;
 export type ListPolicyServiceAccountsItem = ServiceAccount;
-export type ListRegionsQuery = { name?: string; crn?: string };
-export type ListRegionsResponse = { regions: Region[]; default: string };
-export type ListRegionsItem = Region;
 export type ListRoleInlinePoliciesQuery = { name?: string; crn?: string };
 export type ListRoleInlinePoliciesResponse = InlinePolicyListResponse;
 export type ListRoleInlinePoliciesItem = InlinePolicy;
@@ -131,6 +139,8 @@ export type RevokeSTSSessionBody = { reason?: string };
 export type RevokeSTSSessionResponse = STSSessionResponse;
 export type SetRolePermissionBoundaryBody = SetBoundaryRequestInput;
 export type SetServiceAccountPermissionBoundaryBody = SetBoundaryRequestInput;
+export type UpdateOIDCProviderBody = OIDCProviderUpdateRequestInput;
+export type UpdateOIDCProviderResponse = OIDCProviderResponse;
 export type UpdatePolicyBody = PolicyUpdateRequestInput;
 export type UpdatePolicyResponse = { policy?: Policy };
 export type UpdateRoleBody = RoleUpdateRequestInput;
@@ -170,12 +180,10 @@ export type AssumeRoleResponse2 = {
 };
 export type AssumeRoleWithWebIdentityRequestInput = {
   web_identity_token: string;
-  role: RoleReferenceInput;
-  account: AccountReferenceInput;
+  role: string;
   session_name?: string;
   duration_seconds?: number;
 };
-export type AccountReferenceInput = string;
 export type RolePolicyAttachRequestInput = { policy: PolicyReferenceInput };
 export type PolicyReferenceInput = string;
 export type PolicyAttachRequestInput = { policy: PolicyReferenceInput };
@@ -192,6 +200,26 @@ export type OAuthAuthorizeResponse = {
   code?: string;
   redirect_to?: string;
   expires_in: number;
+};
+export type OIDCProviderCreateRequestInput = {
+  name: string;
+  description?: string;
+  issuer: string;
+  audiences: string[];
+  tags?: { [key: string]: string };
+};
+export type OIDCProviderResponse = { oidc_provider: OIDCProvider };
+export type OIDCProvider = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  issuer: string;
+  audiences: string[];
+  is_system: boolean;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
 };
 export type SSHKeyCreateRequestInput = {
   name: string;
@@ -260,8 +288,6 @@ export type Policy = {
   document?: PolicyDocument;
   created_at?: string;
   updated_at?: string;
-  account_id?: string;
-  account_handle?: string;
 };
 export type Tags = { [key: string]: string };
 export type PolicyDocument = {
@@ -318,10 +344,7 @@ export type Role = {
   trust_policy?: TrustPolicy;
   created_at?: string;
   updated_at?: string;
-  account_id?: string;
-  account_handle?: string;
   is_system?: boolean;
-  builtin_kind?: "administrator" | "readonly";
 };
 export type TrustPolicy = {
   principals?: string[];
@@ -336,14 +359,12 @@ export type ServiceAccount = {
   linux_identity?: LinuxIdentity;
   id?: string;
   crn?: string;
-  account_id?: string;
   name?: string;
   description?: string;
   tags?: Tags;
   enabled?: boolean;
   created_at?: string;
   updated_at?: string;
-  account_handle?: string;
 };
 export type LinuxIdentity = {
   home_directory: string;
@@ -388,74 +409,56 @@ export type InlinePolicyResponse = { inline_policy?: InlinePolicy };
 export type InlinePolicy = {
   crn: string;
   id?: string;
-  principal_id?: string;
-  principal_type?: "service_account" | "role";
   name?: string;
   document?: PolicyDocument;
   created_at?: string;
   updated_at?: string;
 };
-export type PermissionBoundaryResponse = {
-  permission_boundary?: PermissionBoundary;
-};
-export type PermissionBoundary = {
-  principal_id?: string;
-  principal_type?: "service_account" | "role";
-  policy_id?: string;
-  policy_name?: string;
-  created_at?: string;
-};
-export type STSSessionResponse = { sts_session?: STSSession };
+export type PermissionBoundaryResponse = { policy: Policy };
+export type STSSessionResponse = { sts_session: STSSession };
 export type STSSession = {
-  id?: string;
-  role_id?: string;
-  principal_id?: string;
-  principal_type?: "user" | "service_account" | "assumed_role";
+  id: string;
   session_name?: string | null;
-  created_at?: string;
-  expires_at?: string;
+  created_at: string;
+  expires_at: string;
   last_used_at?: string | null;
-  revoked?: boolean;
+  revoked: boolean;
   revoked_at?: string | null;
   revoked_reason?: string | null;
   source_ip?: string | null;
   user_agent?: string | null;
-  account_id?: string;
-  account_handle?: string;
-  source_account_id?: string | null;
-  source_principal_type?: string | null;
-  source_principal_crn?: string | null;
-  parent_session_id?: string | null;
   grant_type?: string;
-  crn?: string;
+  crn: string;
+  role?: ResourceRef;
+  source_principal?: ResourceRef;
+  source_account?: ResourceRef;
+  parent_session?: ResourceRef;
+  identity_provider?: ResourceRef;
+  subject?: string;
 };
-export type PolicyListResponse = { policies?: Policy[]; meta?: PaginationMeta };
+export type ResourceRef = { id: string; crn: string; name?: string };
+export type OIDCProviderListResponse = {
+  oidc_providers: OIDCProvider[];
+  meta: PaginationMeta;
+};
 export type PaginationMeta = {
   total?: number;
   limit?: number;
   marker?: string;
   has_more?: boolean;
 };
-export type PolicyRolesListResponse = { roles?: Role[]; meta?: PaginationMeta };
+export type PolicyListResponse = { policies?: Policy[]; meta?: PaginationMeta };
+export type PolicyRolesListResponse = { roles: Role[]; meta: PaginationMeta };
 export type PolicyServiceAccountsListResponse = {
-  service_accounts?: ServiceAccount[];
-  meta?: PaginationMeta;
-};
-export type Region = {
-  crn: string;
-  code: string;
-  name: string;
-  location: string;
-  country_code: string;
-  available: boolean;
-  coming_soon: boolean;
+  service_accounts: ServiceAccount[];
+  meta: PaginationMeta;
 };
 export type InlinePolicyListResponse = { inline_policies?: InlinePolicy[] };
 export type RolePoliciesListResponse = { policies?: Policy[] };
 export type RoleListResponse = { roles?: Role[]; meta?: PaginationMeta };
 export type STSSessionListResponse = {
-  sts_sessions?: STSSession[];
-  meta?: PaginationMeta;
+  sts_sessions: STSSession[];
+  meta: PaginationMeta;
 };
 export type CredentialListResponse = { credentials?: Credential[] };
 export type PrincipalPoliciesListResponse = { policies?: Policy[] };
@@ -469,6 +472,11 @@ export type OAuthRevokeRequestInput = {
   token_type_hint?: string;
 };
 export type SetBoundaryRequestInput = { policy: PolicyReferenceInput };
+export type OIDCProviderUpdateRequestInput = {
+  description?: string;
+  audiences?: string[];
+  tags?: { [key: string]: string };
+};
 export type PolicyUpdateRequestInput = {
   description?: string;
   tags?: TagsInput;
@@ -537,6 +545,18 @@ const operations = {
     id: "authorizeOAuthClient",
     method: "POST",
     path: "/v1/oauth/authorize",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  createOIDCProvider: {
+    id: "createOIDCProvider",
+    method: "POST",
+    path: "/v1/oidc-providers",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -615,6 +635,18 @@ const operations = {
     queryEncoding: {},
     bodyRequired: true,
     contentType: "application/json",
+    accept: "application/json",
+  },
+  deleteOIDCProvider: {
+    id: "deleteOIDCProvider",
+    method: "DELETE",
+    path: "/v1/oidc-providers/{provider_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
     accept: "application/json",
   },
   deletePersonalSSHKey: {
@@ -749,6 +781,18 @@ const operations = {
     contentType: "application/json",
     accept: "application/json",
   },
+  getOIDCProvider: {
+    id: "getOIDCProvider",
+    method: "GET",
+    path: "/v1/oidc-providers/{provider_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
   getPersonalLinuxIdentity: {
     id: "getPersonalLinuxIdentity",
     method: "GET",
@@ -869,6 +913,24 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
+  listOIDCProviders: {
+    id: "listOIDCProviders",
+    method: "GET",
+    path: "/v1/oidc-providers",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {
+      name: { style: "form", explode: true },
+      crn: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+    },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "oidc_providers",
+  },
   listPersonalSSHKeys: {
     id: "listPersonalSSHKeys",
     method: "GET",
@@ -935,22 +997,6 @@ const operations = {
     contentType: "",
     accept: "application/json",
     itemsKey: "service_accounts",
-  },
-  listRegions: {
-    id: "listRegions",
-    method: "GET",
-    path: "/v1/regions",
-    authenticated: false,
-    requiredQuery: [],
-    requiredHeaders: [],
-    queryEncoding: {
-      name: { style: "form", explode: true },
-      crn: { style: "form", explode: true },
-    },
-    bodyRequired: false,
-    contentType: "",
-    accept: "application/json",
-    itemsKey: "regions",
   },
   listRoleInlinePolicies: {
     id: "listRoleInlinePolicies",
@@ -1199,6 +1245,18 @@ const operations = {
     contentType: "application/json",
     accept: "application/json",
   },
+  updateOIDCProvider: {
+    id: "updateOIDCProvider",
+    method: "PATCH",
+    path: "/v1/oidc-providers/{provider_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
   updatePolicy: {
     id: "updatePolicy",
     method: "PATCH",
@@ -1315,6 +1373,21 @@ export class IamService {
       options,
     );
   }
+  /** Create an OIDC provider */
+  createOIDCProvider(
+    body: CreateOIDCProviderBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<CreateOIDCProviderResponse>> {
+    return this.transport.json<CreateOIDCProviderResponse>(
+      "iam",
+      "https://iam.basaltic.sh",
+      operations.createOIDCProvider,
+      {},
+      body,
+      {},
+      options,
+    );
+  }
   /** Add personal SSH key */
   createPersonalSSHKey(
     body: CreatePersonalSSHKeyBody,
@@ -1403,6 +1476,21 @@ export class IamService {
       operations.createServiceAccountSSHKey,
       { service_account_id },
       body,
+      {},
+      options,
+    );
+  }
+  /** Delete an OIDC provider */
+  deleteOIDCProvider(
+    provider_id: string,
+    options: RequestOptions = {},
+  ): Promise<void> {
+    return this.transport.discard(
+      "iam",
+      "https://iam.basaltic.sh",
+      operations.deleteOIDCProvider,
+      { provider_id },
+      undefined,
       {},
       options,
     );
@@ -1570,6 +1658,38 @@ export class IamService {
       body,
       {},
       options,
+    );
+  }
+  /** Get an OIDC provider */
+  getOIDCProvider(
+    provider_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetOIDCProviderResponse>> {
+    return this.transport.json<GetOIDCProviderResponse>(
+      "iam",
+      "https://iam.basaltic.sh",
+      operations.getOIDCProvider,
+      { provider_id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  getOIDCProviderByReference(
+    reference: string,
+    scope: Omit<ListOIDCProvidersQuery, "name" | "crn" | "marker"> = {},
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<OIDCProvider>> {
+    return resolveReference<OIDCProvider>(
+      reference,
+      (id) => this.getOIDCProvider(id, options),
+      (filter) =>
+        this.listOIDCProviders(
+          { ...referenceScope(scope), ...filter, limit: 2 },
+          options,
+        ),
+      true,
+      "oidc_provider",
     );
   }
   /** Get personal Linux identity */
@@ -1833,6 +1953,33 @@ export class IamService {
       options,
     );
   }
+  /** List OIDC providers */
+  listOIDCProviders(
+    query: ListOIDCProvidersQuery = {},
+    options: RequestOptions = {},
+  ): Promise<Page<ListOIDCProvidersResponse, ListOIDCProvidersItem>> {
+    return this.transport.page<
+      ListOIDCProvidersResponse,
+      ListOIDCProvidersItem
+    >(
+      "iam",
+      "https://iam.basaltic.sh",
+      operations.listOIDCProviders,
+      {},
+      undefined,
+      query,
+      options,
+    );
+  }
+  listOIDCProvidersAll(
+    query: ListOIDCProvidersQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListOIDCProvidersItem> {
+    return iteratePages(
+      (marker) => this.listOIDCProviders({ ...query, marker }, options),
+      query.marker ?? "",
+    );
+  }
   /** List personal SSH keys */
   listPersonalSSHKeys(
     options: RequestOptions = {},
@@ -1935,21 +2082,6 @@ export class IamService {
           options,
         ),
       query.marker ?? "",
-    );
-  }
-  /** List regions (legacy IAM) */
-  listRegions(
-    query: ListRegionsQuery = {},
-    options: RequestOptions = {},
-  ): Promise<Page<ListRegionsResponse, ListRegionsItem>> {
-    return this.transport.page<ListRegionsResponse, ListRegionsItem>(
-      "iam",
-      "https://iam.basaltic.sh",
-      operations.listRegions,
-      {},
-      undefined,
-      query,
-      options,
     );
   }
   /** List a role's inline policies */
@@ -2273,6 +2405,22 @@ export class IamService {
       "https://iam.basaltic.sh",
       operations.setServiceAccountPermissionBoundary,
       { service_account_id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Update an OIDC provider */
+  updateOIDCProvider(
+    provider_id: string,
+    body: UpdateOIDCProviderBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<UpdateOIDCProviderResponse>> {
+    return this.transport.json<UpdateOIDCProviderResponse>(
+      "iam",
+      "https://iam.basaltic.sh",
+      operations.updateOIDCProvider,
+      { provider_id },
       body,
       {},
       options,

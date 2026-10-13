@@ -26,7 +26,7 @@ export type ListRecordsResponse = RecordListResponse;
 export type ListRecordsItem = Record2;
 export type ListZoneVPCAssociationsQuery = { name?: string; crn?: string };
 export type ListZoneVPCAssociationsResponse = VPCAssociationsResponse;
-export type ListZoneVPCAssociationsItem = string;
+export type ListZoneVPCAssociationsItem = Vpc;
 export type ListZonesQuery = {
   name?: string;
   crn?: string;
@@ -86,16 +86,15 @@ export type RecordTypeInput =
   | "TXT"
   | "URI";
 export type RecordValueInput = { content: string; disabled?: boolean };
-export type RecordResponse = { record?: Record2 };
+export type RecordResponse = { record: Record2 };
 export type Record2 = {
-  id?: string;
-  crn?: string;
-  zone_id?: string;
-  name?: string;
-  type?: string;
-  ttl?: number;
+  id: string;
+  crn: string;
+  name: string;
+  type: string;
+  ttl: number;
   managed?: boolean;
-  values?: RecordValue[];
+  values: RecordValue[];
 };
 export type RecordValue = { content: string; disabled?: boolean };
 export type ZoneCreateRequestInput = {
@@ -175,14 +174,25 @@ export type ZoneImportSkipped = {
   type?: string;
   reason?: string;
 };
-export type RecordListResponse = { records?: Record2[]; meta?: PaginationMeta };
+export type RecordListResponse = { records: Record2[]; meta: PaginationMeta };
 export type PaginationMeta = {
   total?: number;
   limit?: number;
   marker?: string;
   has_more?: boolean;
 };
-export type VPCAssociationsResponse = { vpc_ids: string[] };
+export type VPCAssociationsResponse = { vpcs: Vpc[]; meta: PaginationMeta };
+export type Vpc = {
+  id: string;
+  crn: string;
+  name: string;
+  description?: string;
+  cidr_ipv4: string;
+  cidr_ipv6?: string | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
+};
 export type ZoneListResponse = { zones?: Zone[]; meta?: PaginationMeta };
 export type RecordUpdateRequestInput = {
   ttl?: number;
@@ -371,7 +381,7 @@ const operations = {
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "vpc_ids",
+    itemsKey: "vpcs",
   },
   listZones: {
     id: "listZones",

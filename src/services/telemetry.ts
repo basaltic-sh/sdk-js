@@ -7,13 +7,13 @@ export type CreateLogGroupBody = CreateLogGroupRequestInput;
 export type CreateLogGroupResponse = LogGroupResponse;
 export type GetLogResponse = LogResponse;
 export type GetLogGroupResponse = LogGroupResponse;
-export type GetRetainedTelemetryPresenceResponse = { has_resources: boolean };
+export type GetRetainedTelemetryPresenceResponse = RetainedDataResponse;
 export type GetTraceResponse = TraceResponse;
 export type GetTraceSettingsResponse = TraceSettingsResponse;
 export type IngestLogsBody = IngestRequestInput;
-export type IngestLogsResponse = IngestResult;
+export type IngestLogsResponse = IngestResponse;
 export type IngestSpansBody = IngestSpansRequestInput;
-export type IngestSpansResponse = IngestResult;
+export type IngestSpansResponse = IngestResponse;
 export type ListLogGroupsQuery = {
   name?: string;
   crn?: string;
@@ -22,63 +22,79 @@ export type ListLogGroupsQuery = {
 };
 export type ListLogGroupsResponse = LogGroupListResponse;
 export type ListLogGroupsItem = LogGroup;
-export type ListMetricNamesQuery = { start: string; end: string };
-export type ListMetricNamesResponse = { status?: string; data?: string[] };
+export type ListMetricNamesQuery = {
+  start: string;
+  end: string;
+  limit?: number;
+  marker?: string;
+};
+export type ListMetricNamesResponse = MetricNamesResponse;
 export type ListMetricNamesItem = string;
-export type ListMetricNamesPostBody = { start: string; end: string };
-export type ListMetricNamesPostResponse = { status?: string; data?: string[] };
+export type ListMetricNamesPostBody = {
+  start: string;
+  end: string;
+  limit?: number;
+  marker?: string;
+};
+export type ListMetricNamesPostResponse = MetricNamesResponse;
 export type ListMetricSeriesQuery = {
   metric: string;
   start: string;
   end: string;
+  limit?: number;
+  marker?: string;
 };
-export type ListMetricSeriesResponse = { [key: string]: unknown };
+export type ListMetricSeriesResponse = MetricSeriesResponse;
+export type ListMetricSeriesItem = { [key: string]: string };
 export type ListMetricSeriesPostBody = {
   metric: string;
   start: string;
   end: string;
+  limit?: number;
+  marker?: string;
 };
-export type ListMetricSeriesPostResponse = { [key: string]: unknown };
-export type PutTraceSettingsBody = UpdateTraceSettingsRequestInput;
-export type PutTraceSettingsResponse = TraceSettingsResponse;
+export type ListMetricSeriesPostResponse = MetricSeriesResponse;
+export type ListTraceSpansQuery = { limit?: number; marker?: string };
+export type ListTraceSpansResponse = SpanListResponse;
+export type ListTraceSpansItem = Span;
 export type QueryMetricsInstantQuery = {
   metric: string;
-  agg: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
+  agg?: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
   "match[]"?: string[];
   "by[]"?: string[];
   step?: string;
   time?: string;
 };
-export type QueryMetricsInstantResponse = { [key: string]: unknown };
+export type QueryMetricsInstantResponse = MetricQueryResponse;
 export type QueryMetricsInstantPostBody = {
   metric: string;
-  agg: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
-  "match[]"?: string[];
-  "by[]"?: string[];
+  agg?: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
   step?: string;
   time?: string;
+  match?: string[];
+  by?: string[];
 };
-export type QueryMetricsInstantPostResponse = { [key: string]: unknown };
+export type QueryMetricsInstantPostResponse = MetricQueryResponse;
 export type QueryMetricsRangeQuery = {
   metric: string;
-  agg: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
+  agg?: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
   "match[]"?: string[];
   "by[]"?: string[];
   start: string;
   end: string;
   step?: string;
 };
-export type QueryMetricsRangeResponse = { [key: string]: unknown };
+export type QueryMetricsRangeResponse = MetricQueryResponse;
 export type QueryMetricsRangePostBody = {
   metric: string;
-  agg: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
-  "match[]"?: string[];
-  "by[]"?: string[];
+  agg?: "avg" | "sum" | "min" | "max" | "count" | "last" | "rate" | "increase";
   start: string;
   end: string;
   step?: string;
+  match?: string[];
+  by?: string[];
 };
-export type QueryMetricsRangePostResponse = { [key: string]: unknown };
+export type QueryMetricsRangePostResponse = MetricQueryResponse;
 export type SearchLogsQuery = {
   from: string;
   to: string;
@@ -105,77 +121,136 @@ export type SearchTracesQuery = {
 export type SearchTracesResponse = TraceListResponse;
 export type UpdateLogGroupBody = UpdateLogGroupRequestInput;
 export type UpdateLogGroupResponse = LogGroupResponse;
+export type UpdateTraceSettingsBody = UpdateTraceSettingsRequestInput;
+export type UpdateTraceSettingsResponse = TraceSettingsResponse;
 export type WriteMetricsBody = BinaryBody;
 export type CreateLogGroupRequestInput = {
   name: string;
   description?: string;
-  retention_days?: number | null;
+  retention_days?:
+    | (
+        | 1
+        | 3
+        | 5
+        | 7
+        | 14
+        | 30
+        | 60
+        | 90
+        | 120
+        | 150
+        | 180
+        | 365
+        | 400
+        | 545
+        | 731
+        | 1096
+        | 1827
+        | 2192
+        | 2557
+        | 2922
+        | 3288
+        | 3653
+        | null
+      )
+    | null;
   kms_key?: string;
   tags?: { [key: string]: string };
 };
-export type LogGroupResponse = { log_group?: LogGroup };
+export type LogGroupResponse = { log_group: LogGroup };
 export type LogGroup = {
-  id?: string;
-  crn?: string;
-  account_id?: string;
-  name?: string;
-  description?: string;
-  retention_days?: number | null;
-  kms_key_unavailable?: boolean;
-  kms_key_crn?: string;
-  tags?: { [key: string]: string };
-  created_at?: string;
-  updated_at?: string;
-};
-export type LogResponse = { log?: LogRecord };
-export type LogRecord = {
-  id?: string;
-  timestamp?: string;
-  organization_id?: string;
-  account_id?: string;
-  log_group_id?: string;
-  log_group?: string;
-  log_stream?: string;
-  severity?: "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL";
-  severity_number?: number;
-  body?: string;
-  attributes?: { [key: string]: string };
-  resource?: { [key: string]: string };
-  trace_id?: string;
-  span_id?: string;
-};
-export type TraceResponse = { trace_id?: string; spans?: Span[] };
-export type Span = {
-  trace_id?: string;
-  span_id?: string;
-  parent_span_id?: string;
-  name?: string;
-  kind?: "INTERNAL" | "SERVER" | "CLIENT" | "PRODUCER" | "CONSUMER";
-  service_name?: string;
-  start_time?: string;
-  end_time?: string;
-  duration_ms?: number;
-  status_code?: "UNSET" | "OK" | "ERROR";
-  status_message?: string;
-  attributes?: { [key: string]: string };
-  resource?: { [key: string]: string };
-  events?: SpanEvent[];
-  links?: SpanLink[];
-};
-export type SpanEvent = {
-  timestamp?: string;
+  kms_key?: ResourceRef;
+  id: string;
+  crn: string;
   name: string;
-  attributes?: { [key: string]: string };
+  description?: string;
+  retention_days:
+    | (
+        | 1
+        | 3
+        | 5
+        | 7
+        | 14
+        | 30
+        | 60
+        | 90
+        | 120
+        | 150
+        | 180
+        | 365
+        | 400
+        | 545
+        | 731
+        | 1096
+        | 1827
+        | 2192
+        | 2557
+        | 2922
+        | 3288
+        | 3653
+        | null
+      )
+    | null;
+  tags: { [key: string]: string };
+  created_at: string;
+  updated_at: string;
 };
-export type SpanLink = { trace_id: string; span_id: string };
-export type TraceSettingsResponse = { trace_settings?: TraceSettings };
+export type ResourceRef = { id: string; crn: string; name?: string };
+export type LogResponse = { log: LogRecord };
+export type LogRecord = {
+  id: string;
+  timestamp: string;
+  log_group: ResourceRef;
+  log_stream: string;
+  severity: "TRACE" | "DEBUG" | "INFO" | "WARN" | "ERROR" | "FATAL";
+  severity_number: number;
+  body: string;
+  attributes?: { [key: string]: string };
+  resource?: { [key: string]: string };
+  trace_id?: string;
+  span_id?: string;
+};
+export type RetainedDataResponse = { retained_data: { has_data: boolean } };
+export type TraceResponse = { trace: TraceSummary };
+export type TraceSummary = {
+  trace_id: string;
+  root_span_id: string;
+  root_name: string;
+  root_service: string;
+  start_time: string;
+  duration_ms: number;
+  span_count: number;
+  error_count: number;
+  service_count: number;
+};
+export type TraceSettingsResponse = { trace_settings: TraceSettings };
 export type TraceSettings = {
-  account_id?: string;
-  retention_days?: number | null;
-  kms_key_unavailable?: boolean;
-  kms_key_crn?: string;
+  retention_days:
+    | 1
+    | 3
+    | 5
+    | 7
+    | 14
+    | 30
+    | 60
+    | 90
+    | 120
+    | 150
+    | 180
+    | 365
+    | 400
+    | 545
+    | 731
+    | 1096
+    | 1827
+    | 2192
+    | 2557
+    | 2922
+    | 3288
+    | 3653;
   created_at?: string;
   updated_at?: string;
+  kms_key?: ResourceRef;
 };
 export type IngestRequestInput = { logs: IngestRecordInput[] };
 export type IngestRecordInput = {
@@ -189,11 +264,13 @@ export type IngestRecordInput = {
   trace_id?: string;
   span_id?: string;
 };
+export type IngestResponse = { ingestion: IngestResult };
 export type IngestResult = {
-  accepted?: number;
-  rejected?: number;
-  errors?: string[];
+  accepted: number;
+  rejected: number;
+  errors?: IngestError[];
 };
+export type IngestError = { index: number; code: string; message: string };
 export type IngestSpansRequestInput = { spans: SpanIngestRecordInput[] };
 export type SpanIngestRecordInput = {
   trace_id: string;
@@ -218,8 +295,8 @@ export type SpanEventInput = {
 };
 export type SpanLinkInput = { trace_id: string; span_id: string };
 export type LogGroupListResponse = {
-  log_groups?: LogGroup[];
-  meta?: PaginationMeta;
+  log_groups: LogGroup[];
+  meta: PaginationMeta;
 };
 export type PaginationMeta = {
   total?: number;
@@ -227,33 +304,111 @@ export type PaginationMeta = {
   marker?: string;
   has_more?: boolean;
 };
-export type UpdateTraceSettingsRequestInput = {
-  retention_days?: number | null;
-  clear_retention?: boolean;
-  kms_key?: string | null;
+export type MetricNamesResponse = {
+  metric_names: string[];
+  meta: PaginationMeta;
 };
-export type LogListResponse = { logs?: LogRecord[]; meta?: PaginationMeta };
+export type MetricSeriesResponse = {
+  series: { [key: string]: string }[];
+  meta: PaginationMeta;
+};
+export type SpanListResponse = { spans: Span[]; meta: PaginationMeta };
+export type Span = {
+  trace_id: string;
+  span_id: string;
+  parent_span_id?: string;
+  name: string;
+  kind: "INTERNAL" | "SERVER" | "CLIENT" | "PRODUCER" | "CONSUMER";
+  service_name: string;
+  start_time: string;
+  end_time: string;
+  duration_ms: number;
+  status_code: "UNSET" | "OK" | "ERROR";
+  status_message?: string;
+  attributes?: { [key: string]: string };
+  resource?: { [key: string]: string };
+  events?: SpanEvent[];
+  links?: SpanLink[];
+};
+export type SpanEvent = {
+  timestamp?: string;
+  name: string;
+  attributes?: { [key: string]: string };
+};
+export type SpanLink = { trace_id: string; span_id: string };
+export type MetricQueryResponse = { query_result: MetricQueryResult };
+export type MetricQueryResult = { metric: string; series: MetricQuerySeries[] };
+export type MetricQuerySeries = {
+  labels: { [key: string]: string };
+  points: MetricPoint[];
+};
+export type MetricPoint = { timestamp: number; value: string };
+export type LogListResponse = { logs: LogRecord[]; meta: PaginationMeta };
 export type TraceListResponse = {
-  traces?: TraceSummary[];
-  meta?: PaginationMeta;
-};
-export type TraceSummary = {
-  trace_id?: string;
-  root_span_id?: string;
-  root_name?: string;
-  root_service?: string;
-  start_time?: string;
-  duration_ms?: number;
-  span_count?: number;
-  error_count?: number;
-  service_count?: number;
+  traces: TraceSummary[];
+  meta: PaginationMeta;
 };
 export type UpdateLogGroupRequestInput = {
   description?: string | null;
-  retention_days?: number;
-  clear_retention?: boolean;
+  retention_days?:
+    | (
+        | 1
+        | 3
+        | 5
+        | 7
+        | 14
+        | 30
+        | 60
+        | 90
+        | 120
+        | 150
+        | 180
+        | 365
+        | 400
+        | 545
+        | 731
+        | 1096
+        | 1827
+        | 2192
+        | 2557
+        | 2922
+        | 3288
+        | 3653
+        | null
+      )
+    | null;
   kms_key?: string | null;
   tags?: { [key: string]: string };
+};
+export type UpdateTraceSettingsRequestInput = {
+  retention_days?:
+    | (
+        | 1
+        | 3
+        | 5
+        | 7
+        | 14
+        | 30
+        | 60
+        | 90
+        | 120
+        | 150
+        | 180
+        | 365
+        | 400
+        | 545
+        | 731
+        | 1096
+        | 1827
+        | 2192
+        | 2557
+        | 2922
+        | 3288
+        | 3653
+        | null
+      )
+    | null;
+  kms_key?: string | null;
 };
 const operations = {
   createLogGroup: {
@@ -319,7 +474,7 @@ const operations = {
   getRetainedTelemetryPresence: {
     id: "getRetainedTelemetryPresence",
     method: "GET",
-    path: "/v1/trace-settings/retained-data",
+    path: "/v1/retained-data",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -404,11 +559,13 @@ const operations = {
     queryEncoding: {
       start: { style: "form", explode: true },
       end: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
     },
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "data",
+    itemsKey: "metric_names",
   },
   listMetricNamesPost: {
     id: "listMetricNamesPost",
@@ -418,8 +575,8 @@ const operations = {
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {},
-    bodyRequired: false,
-    contentType: "application/x-www-form-urlencoded",
+    bodyRequired: true,
+    contentType: "application/json",
     accept: "application/json",
   },
   listMetricSeries: {
@@ -433,10 +590,13 @@ const operations = {
       metric: { style: "form", explode: true },
       start: { style: "form", explode: true },
       end: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
     },
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
+    itemsKey: "series",
   },
   listMetricSeriesPost: {
     id: "listMetricSeriesPost",
@@ -446,28 +606,32 @@ const operations = {
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {},
-    bodyRequired: false,
-    contentType: "application/x-www-form-urlencoded",
-    accept: "application/json",
-  },
-  putTraceSettings: {
-    id: "putTraceSettings",
-    method: "PUT",
-    path: "/v1/trace-settings",
-    authenticated: true,
-    requiredQuery: [],
-    requiredHeaders: [],
-    queryEncoding: {},
     bodyRequired: true,
     contentType: "application/json",
     accept: "application/json",
+  },
+  listTraceSpans: {
+    id: "listTraceSpans",
+    method: "GET",
+    path: "/v1/traces/{trace_id}/spans",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+    },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "spans",
   },
   queryMetricsInstant: {
     id: "queryMetricsInstant",
     method: "GET",
     path: "/v1/metrics/query",
     authenticated: true,
-    requiredQuery: ["metric", "agg"],
+    requiredQuery: ["metric"],
     requiredHeaders: [],
     queryEncoding: {
       metric: { style: "form", explode: true },
@@ -489,16 +653,16 @@ const operations = {
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {},
-    bodyRequired: false,
-    contentType: "application/x-www-form-urlencoded",
+    bodyRequired: true,
+    contentType: "application/json",
     accept: "application/json",
   },
   queryMetricsRange: {
     id: "queryMetricsRange",
     method: "GET",
-    path: "/v1/metrics/query_range",
+    path: "/v1/metrics/query-range",
     authenticated: true,
-    requiredQuery: ["metric", "agg", "start", "end"],
+    requiredQuery: ["metric", "start", "end"],
     requiredHeaders: [],
     queryEncoding: {
       metric: { style: "form", explode: true },
@@ -516,13 +680,13 @@ const operations = {
   queryMetricsRangePost: {
     id: "queryMetricsRangePost",
     method: "POST",
-    path: "/v1/metrics/query_range",
+    path: "/v1/metrics/query-range",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {},
-    bodyRequired: false,
-    contentType: "application/x-www-form-urlencoded",
+    bodyRequired: true,
+    contentType: "application/json",
     accept: "application/json",
   },
   searchLogs: {
@@ -573,6 +737,18 @@ const operations = {
     id: "updateLogGroup",
     method: "PATCH",
     path: "/v1/log-groups/{id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  updateTraceSettings: {
+    id: "updateTraceSettings",
+    method: "PATCH",
+    path: "/v1/trace-settings",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -696,7 +872,7 @@ export class TelemetryService {
       options,
     );
   }
-  /** Get all spans for a trace */
+  /** Get a trace */
   getTrace(
     trace_id: string,
     options: RequestOptions = {},
@@ -779,7 +955,7 @@ export class TelemetryService {
       query.marker ?? "",
     );
   }
-  /** List the distinct metric names emitted in a time window */
+  /** List metric names */
   listMetricNames(
     query: ListMetricNamesQuery,
     options: RequestOptions = {},
@@ -794,9 +970,18 @@ export class TelemetryService {
       options,
     );
   }
-  /** List the distinct metric names emitted in a time window (form body) */
+  listMetricNamesAll(
+    query: ListMetricNamesQuery,
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListMetricNamesItem> {
+    return iteratePages(
+      (marker) => this.listMetricNames({ ...query, marker }, options),
+      query.marker ?? "",
+    );
+  }
+  /** List metric names (JSON) */
   listMetricNamesPost(
-    body: ListMetricNamesPostBody | undefined = undefined,
+    body: ListMetricNamesPostBody,
     options: RequestOptions = {},
   ): Promise<ApiResponse<ListMetricNamesPostResponse>> {
     return this.transport.json<ListMetricNamesPostResponse>(
@@ -809,12 +994,12 @@ export class TelemetryService {
       options,
     );
   }
-  /** List distinct label sets for a metric */
+  /** List metric series */
   listMetricSeries(
     query: ListMetricSeriesQuery,
     options: RequestOptions = {},
-  ): Promise<ApiResponse<ListMetricSeriesResponse>> {
-    return this.transport.json<ListMetricSeriesResponse>(
+  ): Promise<Page<ListMetricSeriesResponse, ListMetricSeriesItem>> {
+    return this.transport.page<ListMetricSeriesResponse, ListMetricSeriesItem>(
       "telemetry",
       "https://telemetry.{region}.basaltic.sh",
       operations.listMetricSeries,
@@ -824,9 +1009,18 @@ export class TelemetryService {
       options,
     );
   }
-  /** List distinct label sets for a metric (form body) */
+  listMetricSeriesAll(
+    query: ListMetricSeriesQuery,
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListMetricSeriesItem> {
+    return iteratePages(
+      (marker) => this.listMetricSeries({ ...query, marker }, options),
+      query.marker ?? "",
+    );
+  }
+  /** List metric series (JSON) */
   listMetricSeriesPost(
-    body: ListMetricSeriesPostBody | undefined = undefined,
+    body: ListMetricSeriesPostBody,
     options: RequestOptions = {},
   ): Promise<ApiResponse<ListMetricSeriesPostResponse>> {
     return this.transport.json<ListMetricSeriesPostResponse>(
@@ -839,22 +1033,33 @@ export class TelemetryService {
       options,
     );
   }
-  /** Update the caller account's trace settings */
-  putTraceSettings(
-    body: PutTraceSettingsBody,
+  /** List spans in a trace */
+  listTraceSpans(
+    trace_id: string,
+    query: ListTraceSpansQuery = {},
     options: RequestOptions = {},
-  ): Promise<ApiResponse<PutTraceSettingsResponse>> {
-    return this.transport.json<PutTraceSettingsResponse>(
+  ): Promise<Page<ListTraceSpansResponse, ListTraceSpansItem>> {
+    return this.transport.page<ListTraceSpansResponse, ListTraceSpansItem>(
       "telemetry",
       "https://telemetry.{region}.basaltic.sh",
-      operations.putTraceSettings,
-      {},
-      body,
-      {},
+      operations.listTraceSpans,
+      { trace_id },
+      undefined,
+      query,
       options,
     );
   }
-  /** Instant structured metric query */
+  listTraceSpansAll(
+    trace_id: string,
+    query: ListTraceSpansQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListTraceSpansItem> {
+    return iteratePages(
+      (marker) => this.listTraceSpans(trace_id, { ...query, marker }, options),
+      query.marker ?? "",
+    );
+  }
+  /** Run an instant metric query */
   queryMetricsInstant(
     query: QueryMetricsInstantQuery,
     options: RequestOptions = {},
@@ -869,9 +1074,9 @@ export class TelemetryService {
       options,
     );
   }
-  /** Instant structured metric query (form body) */
+  /** Run an instant metric query (JSON) */
   queryMetricsInstantPost(
-    body: QueryMetricsInstantPostBody | undefined = undefined,
+    body: QueryMetricsInstantPostBody,
     options: RequestOptions = {},
   ): Promise<ApiResponse<QueryMetricsInstantPostResponse>> {
     return this.transport.json<QueryMetricsInstantPostResponse>(
@@ -884,7 +1089,7 @@ export class TelemetryService {
       options,
     );
   }
-  /** Range structured metric query */
+  /** Run a range metric query */
   queryMetricsRange(
     query: QueryMetricsRangeQuery,
     options: RequestOptions = {},
@@ -899,9 +1104,9 @@ export class TelemetryService {
       options,
     );
   }
-  /** Range structured metric query (form body) */
+  /** Run a range metric query (JSON) */
   queryMetricsRangePost(
-    body: QueryMetricsRangePostBody | undefined = undefined,
+    body: QueryMetricsRangePostBody,
     options: RequestOptions = {},
   ): Promise<ApiResponse<QueryMetricsRangePostResponse>> {
     return this.transport.json<QueryMetricsRangePostResponse>(
@@ -955,6 +1160,21 @@ export class TelemetryService {
       "https://telemetry.{region}.basaltic.sh",
       operations.updateLogGroup,
       { id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Update the caller account's trace settings */
+  updateTraceSettings(
+    body: UpdateTraceSettingsBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<UpdateTraceSettingsResponse>> {
+    return this.transport.json<UpdateTraceSettingsResponse>(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.updateTraceSettings,
+      {},
       body,
       {},
       options,

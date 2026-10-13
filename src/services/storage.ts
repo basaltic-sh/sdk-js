@@ -66,7 +66,6 @@ export type ListPartsItem = MultipartPart;
 export type ListSnapshotPoliciesQuery = {
   limit?: number;
   marker?: string;
-  volume?: string;
   enabled?: boolean;
   name?: string;
   crn?: string;
@@ -153,31 +152,23 @@ export type SnapshotCreateRequestInput = {
   tags?: TagsInput;
 };
 export type TagsInput = { [key: string]: string };
-export type SnapshotResponse = { snapshot?: Snapshot };
+export type SnapshotResponse = { snapshot: Snapshot };
 export type Snapshot = {
-  id?: string;
-  crn?: string;
-  volume_id?: string;
-  snapshot_policy_id?: string;
-  name?: string;
+  id: string;
+  crn: string;
+  volume: ResourceRef;
+  snapshot_policy?: ResourceRef;
+  name: string;
   description?: string;
-  tags?: Tags;
-  size_gb?: number;
-  logical_size_bytes?: number;
-  snapshot_usage?: SnapshotUsage;
-  status?: SnapshotStatus;
+  tags: Tags;
+  size_bytes: number;
+  status: SnapshotStatus;
   faults: Fault[];
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
 };
+export type ResourceRef = { id: string; crn: string; name?: string };
 export type Tags = { [key: string]: string };
-export type SnapshotUsage = {
-  state: "unknown" | "stale" | "measured";
-  scope: "volume_lineage";
-  billable: false;
-  measured_at: string | null;
-  lineage_retained_bytes: number | null;
-};
 export type SnapshotStatus = "creating" | "available" | "deleting" | "error";
 export type Fault = {
   code: string;
@@ -189,7 +180,6 @@ export type Fault = {
   occurrences: number;
 };
 export type SnapshotPolicyCreateRequestInput = {
-  volume: string;
   name: string;
   description?: string;
   interval_minutes: SnapshotIntervalMinutesInput;
@@ -201,11 +191,10 @@ export type SnapshotPolicyCreateRequestInput = {
 export type SnapshotIntervalMinutesInput = number;
 export type SnapshotRetentionCountInput = number;
 export type SnapshotRetentionDaysInput = number;
-export type SnapshotPolicyResponse = { snapshot_policy?: SnapshotPolicy };
+export type SnapshotPolicyResponse = { snapshot_policy: SnapshotPolicy };
 export type SnapshotPolicy = {
   id?: string;
   crn?: string;
-  volume_id?: string;
   name?: string;
   description?: string;
   enabled?: boolean;
@@ -239,33 +228,29 @@ export type VolumePerformanceRequestInput = {
   throughput_mib_s?: number;
 };
 export type CreatableVolumeTypeNameInput = "ssd" | "nvme";
-export type VolumeResponse = { volume?: Volume };
+export type VolumeResponse = { volume: Volume };
 export type Volume = {
-  id?: string;
-  crn?: string;
-  name?: string;
+  id: string;
+  crn: string;
+  name: string;
   description?: string;
-  tags?: Tags;
-  volume_type?: VolumeTypeName;
-  size_gb?: number;
-  performance?: VolumePerformance;
-  included_io_limits?: IncludedIOLimits;
-  status?: VolumeStatus;
-  bootable?: boolean;
-  source_image_id?: string | null;
-  source_snapshot_id?: string | null;
+  tags: Tags;
+  volume_type: VolumeTypeName;
+  size_gb: number;
+  performance: VolumePerformance;
+  included_io_limits: IncludedIOLimits;
+  status: VolumeStatus;
+  bootable: boolean;
   faults: Fault[];
-  created_at?: string;
-  updated_at?: string;
+  created_at: string;
+  updated_at: string;
+  source_image: ResourceRef | null;
+  source_snapshot: ResourceRef | null;
 };
 export type VolumeTypeName = "hdd" | "ssd" | "nvme";
 export type VolumePerformance = {
   requested: IncludedIOLimits;
   applied: IncludedIOLimits;
-  state: "creating" | "pending" | "applied";
-  operation_id?: string;
-  applied_at?: string;
-  last_error?: string;
 };
 export type IncludedIOLimits = {
   iops: number;
@@ -275,10 +260,15 @@ export type IncludedIOLimits = {
   burst_seconds: number;
 };
 export type VolumeStatus =
-  "creating" | "available" | "in_use" | "extending" | "deleting" | "error";
+  | "creating"
+  | "available"
+  | "in_use"
+  | "extending"
+  | "updating"
+  | "deleting"
+  | "error";
 export type VolumeExtendRequestInput = { new_size_gb: number };
-export type BucketCORSResponse = { cors: CORSConfig };
-export type CORSConfig = { rules: CORSRule[] };
+export type BucketCORSResponse = { cors_rules: CORSRule[] };
 export type CORSRule = {
   id?: string;
   allowed_origins: string[];
@@ -287,17 +277,15 @@ export type CORSRule = {
   expose_headers?: string[];
   max_age_seconds?: number;
 };
-export type BucketEncryptionResponse = { encryption: EncryptionConfig };
-export type EncryptionConfig = { rules: EncryptionRule[] };
+export type BucketEncryptionResponse = { encryption_rules: EncryptionRule[] };
 export type EncryptionRule = {
   default?: { sse_algorithm: string; kms_master_key_id?: string };
   bucket_key_enabled?: boolean;
 };
 export type BucketLifecycleResponse = {
   revision: string;
-  lifecycle: LifecycleConfig;
+  lifecycle_rules: LifecycleRule[];
 };
-export type LifecycleConfig = { rules: LifecycleRule[] };
 export type LifecycleRule = {
   id?: string;
   status: "enabled" | "disabled";
@@ -314,10 +302,10 @@ export type LifecycleRule = {
   };
   abort_incomplete_multipart_upload?: { days_after_initiation?: number };
 };
-export type BucketObjectLockResponse = { object_lock: ObjectLockConfig };
+export type BucketObjectLockResponse = ObjectLockConfig;
 export type ObjectLockConfig = {
   object_lock_enabled?: string;
-  rule?: {
+  object_lock_rule?: {
     default_retention?: {
       mode?: "GOVERNANCE" | "COMPLIANCE";
       days?: number;
@@ -392,14 +380,14 @@ export type ListPartsResponse2 = {
 };
 export type MultipartPart = { part_number: number; size: number; etag: string };
 export type SnapshotPolicyListResponse = {
-  snapshot_policies?: SnapshotPolicy[];
-  meta?: PaginationMeta;
+  snapshot_policies: SnapshotPolicy[];
+  meta: PaginationMeta;
 };
 export type SnapshotStatusInput =
   "creating" | "available" | "deleting" | "error";
 export type SnapshotListResponse = {
-  snapshots?: Snapshot[];
-  meta?: PaginationMeta;
+  snapshots: Snapshot[];
+  meta: PaginationMeta;
 };
 export type VolumeTypeListResponse = { volume_types?: VolumeType[] };
 export type VolumeType = {
@@ -413,10 +401,15 @@ export type VolumeType = {
   description?: string;
 };
 export type VolumeStatusInput =
-  "creating" | "available" | "in_use" | "extending" | "deleting" | "error";
-export type VolumeListResponse = { volumes?: Volume[]; meta?: PaginationMeta };
-export type PutBucketCORSRequestInput = { cors: CORSConfigInput };
-export type CORSConfigInput = { rules: CORSRuleInput[] };
+  | "creating"
+  | "available"
+  | "in_use"
+  | "extending"
+  | "updating"
+  | "deleting"
+  | "error";
+export type VolumeListResponse = { volumes: Volume[]; meta: PaginationMeta };
+export type PutBucketCORSRequestInput = { cors_rules: CORSRuleInput[] };
 export type CORSRuleInput = {
   id?: string;
   allowed_origins: string[];
@@ -430,17 +423,15 @@ export type PutBucketDeletionProtectionRequestInput = {
   recovery_window_days?: number;
 };
 export type PutBucketEncryptionRequestInput = {
-  encryption: EncryptionConfigInput;
+  encryption_rules: EncryptionRuleInput[];
 };
-export type EncryptionConfigInput = { rules: EncryptionRuleInput[] };
 export type EncryptionRuleInput = {
   default?: { sse_algorithm: string; kms_master_key_id?: string };
   bucket_key_enabled?: boolean;
 };
 export type PutBucketLifecycleRequestInput = {
-  lifecycle: LifecycleConfigInput;
+  lifecycle_rules: LifecycleRuleInput[];
 };
-export type LifecycleConfigInput = { rules: LifecycleRuleInput[] };
 export type LifecycleRuleInput = {
   id?: string;
   status: "enabled" | "disabled";
@@ -457,12 +448,10 @@ export type LifecycleRuleInput = {
   };
   abort_incomplete_multipart_upload?: { days_after_initiation?: number };
 };
-export type PutBucketObjectLockRequestInput = {
-  object_lock: ObjectLockConfigInput;
-};
+export type PutBucketObjectLockRequestInput = ObjectLockConfigInput;
 export type ObjectLockConfigInput = {
   object_lock_enabled?: string;
-  rule?: {
+  object_lock_rule?: {
     default_retention?: {
       mode?: "GOVERNANCE" | "COMPLIANCE";
       days?: number;
@@ -551,7 +540,7 @@ const operations = {
   createSnapshotPolicy: {
     id: "createSnapshotPolicy",
     method: "POST",
-    path: "/v1/snapshot-policies",
+    path: "/v1/volumes/{volume_id}/snapshot-policies",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -683,7 +672,7 @@ const operations = {
   deleteSnapshotPolicy: {
     id: "deleteSnapshotPolicy",
     method: "DELETE",
-    path: "/v1/snapshot-policies/{policy_id}",
+    path: "/v1/volumes/{volume_id}/snapshot-policies/{policy_id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -827,7 +816,7 @@ const operations = {
   getSnapshotPolicy: {
     id: "getSnapshotPolicy",
     method: "GET",
-    path: "/v1/snapshot-policies/{policy_id}",
+    path: "/v1/volumes/{volume_id}/snapshot-policies/{policy_id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -969,14 +958,13 @@ const operations = {
   listSnapshotPolicies: {
     id: "listSnapshotPolicies",
     method: "GET",
-    path: "/v1/snapshot-policies",
+    path: "/v1/volumes/{volume_id}/snapshot-policies",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
     queryEncoding: {
       limit: { style: "form", explode: true },
       marker: { style: "form", explode: true },
-      volume: { style: "form", explode: true },
       enabled: { style: "form", explode: true },
       name: { style: "form", explode: true },
       crn: { style: "form", explode: true },
@@ -1177,7 +1165,7 @@ const operations = {
   updateSnapshotPolicy: {
     id: "updateSnapshotPolicy",
     method: "PATCH",
-    path: "/v1/snapshot-policies/{policy_id}",
+    path: "/v1/volumes/{volume_id}/snapshot-policies/{policy_id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -1290,6 +1278,7 @@ export class StorageService {
   }
   /** Create snapshot policy */
   createSnapshotPolicy(
+    volume_id: string,
     body: CreateSnapshotPolicyBody,
     options: RequestOptions = {},
   ): Promise<ApiResponse<CreateSnapshotPolicyResponse>> {
@@ -1297,7 +1286,7 @@ export class StorageService {
       "storage",
       "https://storage.{region}.basaltic.sh",
       operations.createSnapshotPolicy,
-      {},
+      { volume_id },
       body,
       {},
       options,
@@ -1456,6 +1445,7 @@ export class StorageService {
   }
   /** Delete snapshot policy */
   deleteSnapshotPolicy(
+    volume_id: string,
     policy_id: string,
     options: RequestOptions = {},
   ): Promise<void> {
@@ -1463,7 +1453,7 @@ export class StorageService {
       "storage",
       "https://storage.{region}.basaltic.sh",
       operations.deleteSnapshotPolicy,
-      { policy_id },
+      { volume_id, policy_id },
       undefined,
       {},
       options,
@@ -1652,6 +1642,7 @@ export class StorageService {
   }
   /** Get snapshot policy */
   getSnapshotPolicy(
+    volume_id: string,
     policy_id: string,
     options: RequestOptions = {},
   ): Promise<ApiResponse<GetSnapshotPolicyResponse>> {
@@ -1659,22 +1650,24 @@ export class StorageService {
       "storage",
       "https://storage.{region}.basaltic.sh",
       operations.getSnapshotPolicy,
-      { policy_id },
+      { volume_id, policy_id },
       undefined,
       {},
       options,
     );
   }
   getSnapshotPolicyByReference(
+    volume_id: string,
     reference: string,
     scope: Omit<ListSnapshotPoliciesQuery, "name" | "crn" | "marker"> = {},
     options: RequestOptions = {},
   ): Promise<ApiResponse<SnapshotPolicy>> {
     return resolveReference<SnapshotPolicy>(
       reference,
-      (id) => this.getSnapshotPolicy(id, options),
+      (id) => this.getSnapshotPolicy(volume_id, id, options),
       (filter) =>
         this.listSnapshotPolicies(
+          volume_id,
           { ...referenceScope(scope), ...filter, limit: 2 },
           options,
         ),
@@ -1854,6 +1847,7 @@ export class StorageService {
   }
   /** List snapshot policies */
   listSnapshotPolicies(
+    volume_id: string,
     query: ListSnapshotPoliciesQuery = {},
     options: RequestOptions = {},
   ): Promise<Page<ListSnapshotPoliciesResponse, ListSnapshotPoliciesItem>> {
@@ -1864,18 +1858,20 @@ export class StorageService {
       "storage",
       "https://storage.{region}.basaltic.sh",
       operations.listSnapshotPolicies,
-      {},
+      { volume_id },
       undefined,
       query,
       options,
     );
   }
   listSnapshotPoliciesAll(
+    volume_id: string,
     query: ListSnapshotPoliciesQuery = {},
     options: RequestOptions = {},
   ): AsyncGenerator<ListSnapshotPoliciesItem> {
     return iteratePages(
-      (marker) => this.listSnapshotPolicies({ ...query, marker }, options),
+      (marker) =>
+        this.listSnapshotPolicies(volume_id, { ...query, marker }, options),
       query.marker ?? "",
     );
   }
@@ -2117,6 +2113,7 @@ export class StorageService {
   }
   /** Update snapshot policy */
   updateSnapshotPolicy(
+    volume_id: string,
     policy_id: string,
     body: UpdateSnapshotPolicyBody,
     options: RequestOptions = {},
@@ -2125,7 +2122,7 @@ export class StorageService {
       "storage",
       "https://storage.{region}.basaltic.sh",
       operations.updateSnapshotPolicy,
-      { policy_id },
+      { volume_id, policy_id },
       body,
       {},
       options,
