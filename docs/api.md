@@ -3775,6 +3775,16 @@ Get account
 getAccount(account_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetAccountResponse>>
 ```
 
+## `workspace.getAccountOnboarding`
+
+Get shared account setup progress
+
+`GET /v1/accounts/{account_id}/onboarding`
+
+```ts
+getAccountOnboarding(account_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetAccountOnboardingResponse>>
+```
+
 ## `workspace.getAccountResources`
 
 Check account resource presence
@@ -4125,6 +4135,16 @@ Remove a user's permission boundary
 removeUserPermissionBoundary(user_id: string, options: RequestOptions = {}): Promise<void>
 ```
 
+## `workspace.retryAccountProvisioning`
+
+Resume failed default network provisioning
+
+`POST /v1/accounts/{account_id}/onboarding/retry`
+
+```ts
+retryAccountProvisioning(account_id: string, options: RequestOptions = {}): Promise<ApiResponse<RetryAccountProvisioningResponse>>
+```
+
 ## `workspace.setUserPermissionBoundary`
 
 Set a user's permission boundary
@@ -4143,6 +4163,16 @@ Update account
 
 ```ts
 updateAccount(account_id: string, body: UpdateAccountBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateAccountResponse>>
+```
+
+## `workspace.updateAccountOnboarding`
+
+Update shared account guide preferences
+
+`PATCH /v1/accounts/{account_id}/onboarding`
+
+```ts
+updateAccountOnboarding(account_id: string, body: UpdateAccountOnboardingBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateAccountOnboardingResponse>>
 ```
 
 ## `workspace.updateGroup`

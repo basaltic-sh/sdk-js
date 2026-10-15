@@ -20,6 +20,7 @@ export type CreateGroupResponse = { group?: Group };
 export type CreatePolicyBody = PolicyCreateRequestInput;
 export type CreatePolicyResponse = { policy?: Policy };
 export type GetAccountResponse = AccountResponse;
+export type GetAccountOnboardingResponse = AccountOnboardingResponse;
 export type GetAccountResourcesResponse = { has_resources: boolean };
 export type GetGroupResponse = { group?: Group };
 export type GetGroupInlinePolicyResponse = InlinePolicyResponse;
@@ -148,9 +149,12 @@ export type PutGroupInlinePolicyBody = PutInlinePolicyRequestInput;
 export type PutGroupInlinePolicyResponse = InlinePolicyResponse;
 export type PutUserInlinePolicyBody = PutInlinePolicyRequestInput;
 export type PutUserInlinePolicyResponse = InlinePolicyResponse;
+export type RetryAccountProvisioningResponse = AccountOnboardingResponse;
 export type SetUserPermissionBoundaryBody = SetBoundaryRequestInput;
 export type UpdateAccountBody = UpdateAccountRequestInput;
 export type UpdateAccountResponse = AccountResponse;
+export type UpdateAccountOnboardingBody = AccountOnboardingUpdateRequestInput;
+export type UpdateAccountOnboardingResponse = AccountOnboardingResponse;
 export type UpdateGroupBody = GroupUpdateRequestInput;
 export type UpdateGroupResponse = { group?: Group };
 export type UpdateOrganizationBody = OrganizationUpdateRequestInput;
@@ -321,6 +325,24 @@ export type PolicyCondition = {
   values: string[];
   set_operator?: "for_all_values" | "for_any_value";
 };
+export type AccountOnboardingResponse = { onboarding: AccountOnboarding };
+export type AccountOnboarding = {
+  account_id: string;
+  region: string;
+  provisioning_status:
+    "pending" | "provisioning" | "ready" | "failed" | "existing";
+  provisioning_step: string;
+  error_code?: string;
+  dismissed: boolean;
+  welcome_seen: boolean;
+  connection_recorded: boolean;
+  steps: { id: "ssh" | "launch" | "connect"; complete: boolean }[];
+  vpc_id?: string;
+  subnet_id?: string;
+  security_group_id?: string;
+  instance_id?: string;
+  confirmed_instance_id?: string;
+};
 export type InlinePolicyResponse = { inline_policy?: InlinePolicy };
 export type InlinePolicy = {
   crn: string;
@@ -443,6 +465,12 @@ export type UserListResponse = { users?: User[]; meta?: PaginationMeta };
 export type PutInlinePolicyRequestInput = { document: PolicyDocumentInput };
 export type SetBoundaryRequestInput = { policy: PolicyReferenceInput };
 export type UpdateAccountRequestInput = { name?: string; description?: string };
+export type AccountOnboardingUpdateRequestInput = {
+  dismissed?: boolean;
+  welcome_seen?: boolean;
+  instance_id?: string;
+  confirmed_instance_id?: string;
+};
 export type GroupUpdateRequestInput = { description?: string };
 export type OrganizationUpdateRequestInput = {
   language?: "en" | "pt-BR" | "es";
@@ -713,6 +741,18 @@ const operations = {
     id: "getAccount",
     method: "GET",
     path: "/v1/accounts/{account_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  getAccountOnboarding: {
+    id: "getAccountOnboarding",
+    method: "GET",
+    path: "/v1/accounts/{account_id}/onboarding",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -1237,6 +1277,18 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
+  retryAccountProvisioning: {
+    id: "retryAccountProvisioning",
+    method: "POST",
+    path: "/v1/accounts/{account_id}/onboarding/retry",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
   setUserPermissionBoundary: {
     id: "setUserPermissionBoundary",
     method: "PUT",
@@ -1253,6 +1305,18 @@ const operations = {
     id: "updateAccount",
     method: "PATCH",
     path: "/v1/accounts/{account_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  updateAccountOnboarding: {
+    id: "updateAccountOnboarding",
+    method: "PATCH",
+    path: "/v1/accounts/{account_id}/onboarding",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -1651,6 +1715,21 @@ export class WorkspaceService {
         ),
       true,
       "account",
+    );
+  }
+  /** Get shared account setup progress */
+  getAccountOnboarding(
+    account_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetAccountOnboardingResponse>> {
+    return this.transport.json<GetAccountOnboardingResponse>(
+      "workspace",
+      "https://workspace.basaltic.sh",
+      operations.getAccountOnboarding,
+      { account_id },
+      undefined,
+      {},
+      options,
     );
   }
   /** Check account resource presence */
@@ -2458,6 +2537,21 @@ export class WorkspaceService {
       options,
     );
   }
+  /** Resume failed default network provisioning */
+  retryAccountProvisioning(
+    account_id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<RetryAccountProvisioningResponse>> {
+    return this.transport.json<RetryAccountProvisioningResponse>(
+      "workspace",
+      "https://workspace.basaltic.sh",
+      operations.retryAccountProvisioning,
+      { account_id },
+      undefined,
+      {},
+      options,
+    );
+  }
   /** Set a user's permission boundary */
   setUserPermissionBoundary(
     user_id: string,
@@ -2484,6 +2578,22 @@ export class WorkspaceService {
       "workspace",
       "https://workspace.basaltic.sh",
       operations.updateAccount,
+      { account_id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Update shared account guide preferences */
+  updateAccountOnboarding(
+    account_id: string,
+    body: UpdateAccountOnboardingBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<UpdateAccountOnboardingResponse>> {
+    return this.transport.json<UpdateAccountOnboardingResponse>(
+      "workspace",
+      "https://workspace.basaltic.sh",
+      operations.updateAccountOnboarding,
       { account_id },
       body,
       {},

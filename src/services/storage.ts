@@ -161,7 +161,10 @@ export type Snapshot = {
   name: string;
   description?: string;
   tags: Tags;
-  size_bytes: number;
+  size_bytes: number | null;
+  restore_size_bytes: number;
+  usage_state: "unknown" | "stale" | "measured";
+  usage_measured_at: string | null;
   status: SnapshotStatus;
   faults: Fault[];
   created_at: string;

@@ -82,6 +82,7 @@ export type CurrentUsage = {
   amount: string;
   period_start: string;
   items: UsageLine[];
+  included_usage: IncludedUsage[];
 };
 export type UsageLine = {
   sku: string;
@@ -89,6 +90,21 @@ export type UsageLine = {
   quantity: string;
   unit: string;
   amount: string;
+};
+export type IncludedUsage = {
+  code: string;
+  name: string;
+  unit: string;
+  period_start: string;
+  period_end: string;
+  counted_from: string;
+  base: string;
+  contributed: string;
+  total: string;
+  used: string;
+  included_used: string;
+  remaining: string;
+  overage: string;
 };
 export type InvoiceResponse = { invoice: Invoice };
 export type Invoice = {
@@ -179,6 +195,13 @@ export type Price = {
   unit_price: string;
   currency: string;
   metadata: { [key: string]: unknown };
+  included_usage?: CatalogAllowance[];
+};
+export type CatalogAllowance = {
+  policy_code: string;
+  unit: string;
+  monthly_quantity: string;
+  monthly_base: string;
 };
 export type TransactionListResponse = {
   transactions: Transaction[];
