@@ -3,8 +3,11 @@ import type { Transport, Operation, BinaryBody } from "../transport.js";
 import type { RequestOptions } from "../config.js";
 import type { ApiResponse, Page } from "../response.js";
 import { iteratePages, referenceScope, resolveReference } from "../response.js";
+export type CreateAlertBody = CreateAlertRequestInput;
+export type CreateAlertResponse = AlertResponse;
 export type CreateLogGroupBody = CreateLogGroupRequestInput;
 export type CreateLogGroupResponse = LogGroupResponse;
+export type GetAlertResponse = AlertResponse;
 export type GetLogResponse = LogResponse;
 export type GetLogGroupResponse = LogGroupResponse;
 export type GetRetainedTelemetryPresenceResponse = RetainedDataResponse;
@@ -14,6 +17,16 @@ export type IngestLogsBody = IngestRequestInput;
 export type IngestLogsResponse = IngestResponse;
 export type IngestSpansBody = IngestSpansRequestInput;
 export type IngestSpansResponse = IngestResponse;
+export type ListAlertsQuery = {
+  name?: string;
+  crn?: string;
+  state?:
+    "ok" | "pending" | "firing" | "no_data" | "error" | "silenced" | "disabled";
+  limit?: number;
+  marker?: string;
+};
+export type ListAlertsResponse = AlertListResponse;
+export type ListAlertsItem = Alert;
 export type ListLogGroupsQuery = {
   name?: string;
   crn?: string;
@@ -119,11 +132,78 @@ export type SearchTracesQuery = {
   marker?: string;
 };
 export type SearchTracesResponse = TraceListResponse;
+export type UpdateAlertBody = UpdateAlertRequestInput;
+export type UpdateAlertResponse = AlertResponse;
 export type UpdateLogGroupBody = UpdateLogGroupRequestInput;
 export type UpdateLogGroupResponse = LogGroupResponse;
 export type UpdateTraceSettingsBody = UpdateTraceSettingsRequestInput;
 export type UpdateTraceSettingsResponse = TraceSettingsResponse;
 export type WriteMetricsBody = BinaryBody;
+export type CreateAlertRequestInput = {
+  name: string;
+  topic: string;
+  expression: AlertExpressionInput;
+  operator: "gt" | "gte" | "lt" | "lte";
+  threshold: number;
+  window_seconds: number;
+  for_seconds: number;
+  enabled?: boolean;
+  silenced_until?: string | null;
+};
+export type AlertExpressionInput = {
+  metric: string;
+  agg: "avg" | "min" | "max" | "sum" | "last" | "count" | "rate" | "increase";
+  match?: string[];
+  by?: string[];
+  denominator?: AlertQueryInput;
+  scale: number;
+  unit?: string;
+};
+export type AlertQueryInput = {
+  metric: string;
+  agg: "avg" | "min" | "max" | "sum" | "last" | "count" | "rate" | "increase";
+  match?: string[];
+  by?: string[];
+};
+export type AlertResponse = { alert: Alert };
+export type Alert = {
+  expression: AlertExpression;
+  operator: "gt" | "gte" | "lt" | "lte";
+  threshold: number;
+  window_seconds: number;
+  for_seconds: number;
+  enabled: boolean;
+  silenced_until: string | null;
+  id: string;
+  crn: string;
+  name: string;
+  topic: ResourceRef;
+  state: "ok" | "pending" | "firing" | "no_data" | "error";
+  last_value: number | null;
+  evaluated_at?: string;
+  state_changed_at?: string;
+  pending_since?: string;
+  evaluation_error?: string;
+  delivery_error?: string;
+  created_at: string;
+  updated_at: string;
+};
+export type AlertExpression = {
+  metric: string;
+  agg: "avg" | "min" | "max" | "sum" | "last" | "count" | "rate" | "increase";
+  match?: string[];
+  by?: string[];
+  denominator?: AlertQuery;
+  scale: number;
+  unit?: string;
+};
+export type AlertQuery = {
+  metric: string;
+  agg: "avg" | "min" | "max" | "sum" | "last" | "count" | "rate" | "increase";
+  match?: string[];
+  by?: string[];
+};
+export type ResourceRef = { id: string; crn: string; name?: string };
 export type CreateLogGroupRequestInput = {
   name: string;
   description?: string;
@@ -195,7 +275,6 @@ export type LogGroup = {
   created_at: string;
   updated_at: string;
 };
-export type ResourceRef = { id: string; crn: string; name?: string };
 export type LogResponse = { log: LogRecord };
 export type LogRecord = {
   id: string;
@@ -210,7 +289,9 @@ export type LogRecord = {
   trace_id?: string;
   span_id?: string;
 };
-export type RetainedDataResponse = { retained_data: { has_data: boolean } };
+export type RetainedDataResponse = {
+  retained_data: { has_data: boolean; blocks_deletion?: boolean };
+};
 export type TraceResponse = { trace: TraceSummary };
 export type TraceSummary = {
   trace_id: string;
@@ -294,15 +375,16 @@ export type SpanEventInput = {
   attributes?: { [key: string]: string };
 };
 export type SpanLinkInput = { trace_id: string; span_id: string };
-export type LogGroupListResponse = {
-  log_groups: LogGroup[];
-  meta: PaginationMeta;
-};
+export type AlertListResponse = { alerts: Alert[]; meta: PaginationMeta };
 export type PaginationMeta = {
   total?: number;
   limit?: number;
   marker?: string;
   has_more?: boolean;
+};
+export type LogGroupListResponse = {
+  log_groups: LogGroup[];
+  meta: PaginationMeta;
 };
 export type MetricNamesResponse = {
   metric_names: string[];
@@ -347,6 +429,16 @@ export type LogListResponse = { logs: LogRecord[]; meta: PaginationMeta };
 export type TraceListResponse = {
   traces: TraceSummary[];
   meta: PaginationMeta;
+};
+export type UpdateAlertRequestInput = {
+  topic?: string;
+  expression?: AlertExpressionInput;
+  operator?: "gt" | "gte" | "lt" | "lte";
+  threshold?: number;
+  window_seconds?: number;
+  for_seconds?: number;
+  enabled?: boolean;
+  silenced_until?: string | null;
 };
 export type UpdateLogGroupRequestInput = {
   description?: string | null;
@@ -411,6 +503,18 @@ export type UpdateTraceSettingsRequestInput = {
   kms_key?: string | null;
 };
 const operations = {
+  createAlert: {
+    id: "createAlert",
+    method: "POST",
+    path: "/v1/alerts",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
   createLogGroup: {
     id: "createLogGroup",
     method: "POST",
@@ -421,6 +525,18 @@ const operations = {
     queryEncoding: {},
     bodyRequired: true,
     contentType: "application/json",
+    accept: "application/json",
+  },
+  deleteAlert: {
+    id: "deleteAlert",
+    method: "DELETE",
+    path: "/v1/alerts/{id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
     accept: "application/json",
   },
   deleteLogGroup: {
@@ -439,6 +555,18 @@ const operations = {
     id: "deleteTraceSettings",
     method: "DELETE",
     path: "/v1/trace-settings",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+  },
+  getAlert: {
+    id: "getAlert",
+    method: "GET",
+    path: "/v1/alerts/{id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -530,6 +658,25 @@ const operations = {
     bodyRequired: true,
     contentType: "application/json",
     accept: "application/json",
+  },
+  listAlerts: {
+    id: "listAlerts",
+    method: "GET",
+    path: "/v1/alerts",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {
+      name: { style: "form", explode: true },
+      crn: { style: "form", explode: true },
+      state: { style: "form", explode: true },
+      limit: { style: "form", explode: true },
+      marker: { style: "form", explode: true },
+    },
+    bodyRequired: false,
+    contentType: "",
+    accept: "application/json",
+    itemsKey: "alerts",
   },
   listLogGroups: {
     id: "listLogGroups",
@@ -733,6 +880,18 @@ const operations = {
     contentType: "",
     accept: "application/json",
   },
+  updateAlert: {
+    id: "updateAlert",
+    method: "PATCH",
+    path: "/v1/alerts/{id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
   updateLogGroup: {
     id: "updateLogGroup",
     method: "PATCH",
@@ -772,6 +931,21 @@ const operations = {
 } as const satisfies Record<string, Operation>;
 export class TelemetryService {
   constructor(private readonly transport: Transport) {}
+  /** Create a metric alert */
+  createAlert(
+    body: CreateAlertBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<CreateAlertResponse>> {
+    return this.transport.json<CreateAlertResponse>(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.createAlert,
+      {},
+      body,
+      {},
+      options,
+    );
+  }
   /** Create a log group */
   createLogGroup(
     body: CreateLogGroupBody,
@@ -783,6 +957,18 @@ export class TelemetryService {
       operations.createLogGroup,
       {},
       body,
+      {},
+      options,
+    );
+  }
+  /** Delete a metric alert */
+  deleteAlert(id: string, options: RequestOptions = {}): Promise<void> {
+    return this.transport.discard(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.deleteAlert,
+      { id },
+      undefined,
       {},
       options,
     );
@@ -809,6 +995,38 @@ export class TelemetryService {
       undefined,
       {},
       options,
+    );
+  }
+  /** Get a metric alert */
+  getAlert(
+    id: string,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<GetAlertResponse>> {
+    return this.transport.json<GetAlertResponse>(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.getAlert,
+      { id },
+      undefined,
+      {},
+      options,
+    );
+  }
+  getAlertByReference(
+    reference: string,
+    scope: Omit<ListAlertsQuery, "name" | "crn" | "marker"> = {},
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<Alert>> {
+    return resolveReference<Alert>(
+      reference,
+      (id) => this.getAlert(id, options),
+      (filter) =>
+        this.listAlerts(
+          { ...referenceScope(scope), ...filter, limit: 2 },
+          options,
+        ),
+      true,
+      "alert",
     );
   }
   /** Get a single log record by id */
@@ -929,6 +1147,30 @@ export class TelemetryService {
       body,
       {},
       options,
+    );
+  }
+  /** List metric alerts */
+  listAlerts(
+    query: ListAlertsQuery = {},
+    options: RequestOptions = {},
+  ): Promise<Page<ListAlertsResponse, ListAlertsItem>> {
+    return this.transport.page<ListAlertsResponse, ListAlertsItem>(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.listAlerts,
+      {},
+      undefined,
+      query,
+      options,
+    );
+  }
+  listAlertsAll(
+    query: ListAlertsQuery = {},
+    options: RequestOptions = {},
+  ): AsyncGenerator<ListAlertsItem> {
+    return iteratePages(
+      (marker) => this.listAlerts({ ...query, marker }, options),
+      query.marker ?? "",
     );
   }
   /** List log groups (or look up one by name) */
@@ -1146,6 +1388,22 @@ export class TelemetryService {
       {},
       undefined,
       query,
+      options,
+    );
+  }
+  /** Update a metric alert */
+  updateAlert(
+    id: string,
+    body: UpdateAlertBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<UpdateAlertResponse>> {
+    return this.transport.json<UpdateAlertResponse>(
+      "telemetry",
+      "https://telemetry.{region}.basaltic.sh",
+      operations.updateAlert,
+      { id },
+      body,
+      {},
       options,
     );
   }

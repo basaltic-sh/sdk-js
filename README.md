@@ -2,7 +2,7 @@
 
 [![Public checks](https://github.com/basaltic-sh/sdk-js/actions/workflows/public-checks.yml/badge.svg)](https://github.com/basaltic-sh/sdk-js/actions/workflows/public-checks.yml)
 
-The official Basaltic SDK: 401 operations across 15 services, typed request and
+The official Basaltic SDK: 547 operations across 19 services, typed request and
 response models, OAuth credentials, pagination, and retries. Requires Node.js 22
 or newer, or a modern browser with Fetch, Web Streams and AbortSignal.any.
 ES modules and CommonJS are included, with no runtime dependencies.
@@ -66,8 +66,8 @@ does not imply that every API endpoint permits every browser origin.
 
 ## Services and responses
 
-Services: `audit`, `billing`, `catalog`, `certificate`, `compute`, `dns`, `iam`,
-`kms`, `loadbalancer`, `network`, `quota`, `secrets`, `storage`, `telemetry`,
+Services: `audit`, `billing`, `catalog`, `certificate`, `compute`, `dns`, `email`, `iam`,
+`kms`, `loadbalancer`, `network`, `notifications`, `queue`, `quota`, `registry`, `secrets`, `storage`, `telemetry`,
 `workspace`. The [API reference](docs/api.md) lists every operation and signature.
 Types are exported as service namespaces, for example `ComputeTypes.Instance`
 and `ComputeTypes.CreateInstanceBody`.

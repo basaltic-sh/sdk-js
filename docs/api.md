@@ -795,6 +795,626 @@ Verify zone ownership
 verifyZoneOwnership(zone_id: string, options: RequestOptions = {}): Promise<ApiResponse<VerifyZoneOwnershipResponse>>
 ```
 
+## `email.addSuppressionOverride`
+
+Add a suppression override address
+
+`POST /v1/configuration-sets/{configuration_set_id}/suppression-overrides`
+
+```ts
+addSuppressionOverride(configuration_set_id: string, body: AddSuppressionOverrideBody, options: RequestOptions = {}): Promise<ApiResponse<AddSuppressionOverrideResponse>>
+```
+
+## `email.beginDKIMRotation`
+
+Begin DKIM key rotation
+
+`POST /v1/identities/{identity_id}/dkim/rotate`
+
+```ts
+beginDKIMRotation(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<BeginDKIMRotationResponse>>
+```
+
+## `email.cancelDKIMRotation`
+
+Cancel in-progress DKIM rotation
+
+`DELETE /v1/identities/{identity_id}/dkim/rotate`
+
+```ts
+cancelDKIMRotation(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<CancelDKIMRotationResponse>>
+```
+
+## `email.createConfigurationSet`
+
+Create a configuration set
+
+`POST /v1/configuration-sets`
+
+```ts
+createConfigurationSet(body: CreateConfigurationSetBody, options: RequestOptions = {}): Promise<ApiResponse<CreateConfigurationSetResponse>>
+```
+
+## `email.createIPPool`
+
+Create an IP pool
+
+`POST /v1/ip-pools`
+
+```ts
+createIPPool(body: CreateIPPoolBody, options: RequestOptions = {}): Promise<ApiResponse<CreateIPPoolResponse>>
+```
+
+## `email.createIdentity`
+
+Create a sender identity
+
+`POST /v1/identities`
+
+```ts
+createIdentity(body: CreateIdentityBody, options: RequestOptions = {}): Promise<ApiResponse<CreateIdentityResponse>>
+```
+
+## `email.createRecipientRule`
+
+Create recipient rule
+
+`POST /v1/identities/{identity_id}/recipient-rules`
+
+```ts
+createRecipientRule(identity_id: string, body: CreateRecipientRuleBody, options: RequestOptions = {}): Promise<ApiResponse<CreateRecipientRuleResponse>>
+```
+
+## `email.createSuppression`
+
+Add a suppression entry
+
+`POST /v1/suppressions`
+
+```ts
+createSuppression(body: CreateSuppressionBody, options: RequestOptions = {}): Promise<ApiResponse<CreateSuppressionResponse>>
+```
+
+## `email.createTemplate`
+
+Create a template
+
+`POST /v1/templates`
+
+```ts
+createTemplate(body: CreateTemplateBody, options: RequestOptions = {}): Promise<ApiResponse<CreateTemplateResponse>>
+```
+
+## `email.deleteConfigurationSet`
+
+Delete a configuration set
+
+`DELETE /v1/configuration-sets/{configuration_set_id}`
+
+```ts
+deleteConfigurationSet(configuration_set_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.deleteIPPool`
+
+Delete an IP pool
+
+`DELETE /v1/ip-pools/{ip_pool_id}`
+
+```ts
+deleteIPPool(ip_pool_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.deleteIdentity`
+
+Delete an identity
+
+`DELETE /v1/identities/{identity_id}`
+
+```ts
+deleteIdentity(identity_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.deleteRecipientRule`
+
+Delete recipient rule
+
+`DELETE /v1/identities/{identity_id}/recipient-rules/{rule_id}`
+
+```ts
+deleteRecipientRule(identity_id: string, rule_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.deleteSuppression`
+
+Delete suppression
+
+`DELETE /v1/suppressions/{suppression_id}`
+
+```ts
+deleteSuppression(suppression_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.deleteTemplate`
+
+Delete a template
+
+`DELETE /v1/templates/{template_id}`
+
+```ts
+deleteTemplate(template_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.describeConfigurationSet`
+
+Describe a configuration set
+
+`GET /v1/configuration-sets/{configuration_set_id}`
+
+```ts
+describeConfigurationSet(configuration_set_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeConfigurationSetResponse>>
+```
+
+## `email.describeDedicatedIP`
+
+Describe a dedicated IP
+
+`GET /v1/dedicated-ips/{dedicated_ip_id}`
+
+```ts
+describeDedicatedIP(dedicated_ip_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeDedicatedIPResponse>>
+```
+
+## `email.describeIPPool`
+
+Describe an IP pool
+
+`GET /v1/ip-pools/{ip_pool_id}`
+
+```ts
+describeIPPool(ip_pool_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeIPPoolResponse>>
+```
+
+## `email.describeIdentity`
+
+Describe an identity
+
+`GET /v1/identities/{identity_id}`
+
+```ts
+describeIdentity(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeIdentityResponse>>
+```
+
+## `email.describeReceivedMessage`
+
+Get received message metadata
+
+`GET /v1/received-messages/{message_id}`
+
+```ts
+describeReceivedMessage(message_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeReceivedMessageResponse>>
+```
+
+## `email.describeRecipientRule`
+
+Get recipient rule
+
+`GET /v1/identities/{identity_id}/recipient-rules/{rule_id}`
+
+```ts
+describeRecipientRule(identity_id: string, rule_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeRecipientRuleResponse>>
+```
+
+## `email.describeSentMessage`
+
+Describe a sent message
+
+`GET /v1/sent-messages/{message_id}`
+
+```ts
+describeSentMessage(message_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeSentMessageResponse>>
+```
+
+## `email.describeSuppression`
+
+Get suppression
+
+`GET /v1/suppressions/{suppression_id}`
+
+```ts
+describeSuppression(suppression_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeSuppressionResponse>>
+```
+
+## `email.describeTemplate`
+
+Describe a template
+
+`GET /v1/templates/{template_id}`
+
+```ts
+describeTemplate(template_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeTemplateResponse>>
+```
+
+## `email.downloadReceivedAttachment`
+
+Download received attachment
+
+`GET /v1/received-messages/{message_id}/attachments/{attachment_id}`
+
+```ts
+downloadReceivedAttachment(message_id: string, attachment_id: string, options: RequestOptions = {}): Promise<Response>
+```
+
+## `email.downloadReceivedMessage`
+
+Download received message
+
+`GET /v1/received-messages/{message_id}/raw`
+
+```ts
+downloadReceivedMessage(message_id: string, options: RequestOptions = {}): Promise<Response>
+```
+
+## `email.downloadSentAttachment`
+
+Download sent attachment
+
+`GET /v1/sent-messages/{message_id}/attachments/{attachment_id}`
+
+```ts
+downloadSentAttachment(message_id: string, attachment_id: string, options: RequestOptions = {}): Promise<Response>
+```
+
+## `email.downloadSentMessage`
+
+Download sent message
+
+`GET /v1/sent-messages/{message_id}/raw`
+
+```ts
+downloadSentMessage(message_id: string, options: RequestOptions = {}): Promise<Response>
+```
+
+## `email.finalizeDKIMRotation`
+
+Finalize DKIM key rotation
+
+`POST /v1/identities/{identity_id}/dkim/rotate/finalize`
+
+```ts
+finalizeDKIMRotation(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<FinalizeDKIMRotationResponse>>
+```
+
+## `email.getReceivedMessageContent`
+
+Get received message content
+
+`GET /v1/received-messages/{message_id}/content`
+
+```ts
+getReceivedMessageContent(message_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetReceivedMessageContentResponse>>
+```
+
+## `email.getReceivingConfiguration`
+
+Get receiving configuration
+
+`GET /v1/identities/{identity_id}/receiving`
+
+```ts
+getReceivingConfiguration(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetReceivingConfigurationResponse>>
+```
+
+## `email.getSentMessageContent`
+
+Get sent message content
+
+`GET /v1/sent-messages/{message_id}/content`
+
+```ts
+getSentMessageContent(message_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetSentMessageContentResponse>>
+```
+
+## `email.getSentMessageEngagement`
+
+Sent message engagement
+
+`GET /v1/sent-messages/{message_id}/engagement`
+
+```ts
+getSentMessageEngagement(message_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetSentMessageEngagementResponse>>
+```
+
+## `email.listConfigurationSets`
+
+List configuration sets
+
+`GET /v1/configuration-sets`
+
+```ts
+listConfigurationSets(query: ListConfigurationSetsQuery = {}, options: RequestOptions = {}): Promise<Page<ListConfigurationSetsResponse, ListConfigurationSetsItem>>
+```
+
+## `email.listDMARCReports`
+
+List DMARC report records
+
+`GET /v1/identities/{identity_id}/dmarc-reports`
+
+```ts
+listDMARCReports(identity_id: string, query: ListDMARCReportsQuery = {}, options: RequestOptions = {}): Promise<Page<ListDMARCReportsResponse, ListDMARCReportsItem>>
+```
+
+## `email.listDedicatedIPs`
+
+List dedicated IPs
+
+`GET /v1/dedicated-ips`
+
+```ts
+listDedicatedIPs(query: ListDedicatedIPsQuery = {}, options: RequestOptions = {}): Promise<Page<ListDedicatedIPsResponse, ListDedicatedIPsItem>>
+```
+
+## `email.listIPPools`
+
+List IP pools
+
+`GET /v1/ip-pools`
+
+```ts
+listIPPools(query: ListIPPoolsQuery = {}, options: RequestOptions = {}): Promise<Page<ListIPPoolsResponse, ListIPPoolsItem>>
+```
+
+## `email.listIdentities`
+
+List sender identities
+
+`GET /v1/identities`
+
+```ts
+listIdentities(query: ListIdentitiesQuery = {}, options: RequestOptions = {}): Promise<Page<ListIdentitiesResponse, ListIdentitiesItem>>
+```
+
+## `email.listReceivedMessages`
+
+List received messages
+
+`GET /v1/received-messages`
+
+```ts
+listReceivedMessages(query: ListReceivedMessagesQuery = {}, options: RequestOptions = {}): Promise<Page<ListReceivedMessagesResponse, ListReceivedMessagesItem>>
+```
+
+## `email.listRecipientRules`
+
+List recipient rules
+
+`GET /v1/identities/{identity_id}/recipient-rules`
+
+```ts
+listRecipientRules(identity_id: string, query: ListRecipientRulesQuery = {}, options: RequestOptions = {}): Promise<Page<ListRecipientRulesResponse, ListRecipientRulesItem>>
+```
+
+## `email.listRejections`
+
+List API-side send rejections
+
+`GET /v1/rejections`
+
+```ts
+listRejections(query: ListRejectionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListRejectionsResponse, ListRejectionsItem>>
+```
+
+## `email.listSentMessages`
+
+List sent messages
+
+`GET /v1/sent-messages`
+
+```ts
+listSentMessages(query: ListSentMessagesQuery = {}, options: RequestOptions = {}): Promise<Page<ListSentMessagesResponse, ListSentMessagesItem>>
+```
+
+## `email.listSuppressions`
+
+List suppression entries
+
+`GET /v1/suppressions`
+
+```ts
+listSuppressions(query: ListSuppressionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListSuppressionsResponse, ListSuppressionsItem>>
+```
+
+## `email.listTemplates`
+
+List templates
+
+`GET /v1/templates`
+
+```ts
+listTemplates(query: ListTemplatesQuery = {}, options: RequestOptions = {}): Promise<Page<ListTemplatesResponse, ListTemplatesItem>>
+```
+
+## `email.releaseDedicatedIP`
+
+Release a dedicated IP
+
+`DELETE /v1/dedicated-ips/{dedicated_ip_id}`
+
+```ts
+releaseDedicatedIP(dedicated_ip_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.removeSuppressionOverride`
+
+Remove a suppression override address
+
+`DELETE /v1/configuration-sets/{configuration_set_id}/suppression-overrides/{address}`
+
+```ts
+removeSuppressionOverride(configuration_set_id: string, address: string, options: RequestOptions = {}): Promise<ApiResponse<RemoveSuppressionOverrideResponse>>
+```
+
+## `email.requestDedicatedIP`
+
+Request a dedicated IP
+
+`POST /v1/dedicated-ips`
+
+```ts
+requestDedicatedIP(body: RequestDedicatedIPBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<RequestDedicatedIPResponse>>
+```
+
+## `email.sendMessage`
+
+Send a message
+
+`POST /v1/sent-messages`
+
+```ts
+sendMessage(body: SendMessageBody, options: RequestOptions = {}): Promise<ApiResponse<SendMessageResponse>>
+```
+
+## `email.sendMessageBatch`
+
+Send message batch
+
+`POST /v1/sent-messages/batch`
+
+```ts
+sendMessageBatch(body: SendMessageBatchBody, options: RequestOptions = {}): Promise<ApiResponse<SendMessageBatchResponse>>
+```
+
+## `email.setBIMI`
+
+Set BIMI logo / VMC URLs
+
+`PATCH /v1/identities/{identity_id}/bimi`
+
+```ts
+setBIMI(identity_id: string, body: SetBIMIBody, options: RequestOptions = {}): Promise<ApiResponse<SetBIMIResponse>>
+```
+
+## `email.setMailFromDomain`
+
+Set custom MAIL FROM domain
+
+`PATCH /v1/identities/{identity_id}/mail-from-domain`
+
+```ts
+setMailFromDomain(identity_id: string, body: SetMailFromDomainBody, options: RequestOptions = {}): Promise<ApiResponse<SetMailFromDomainResponse>>
+```
+
+## `email.updateConfigurationSet`
+
+Update a configuration set
+
+`PATCH /v1/configuration-sets/{configuration_set_id}`
+
+```ts
+updateConfigurationSet(configuration_set_id: string, body: UpdateConfigurationSetBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateConfigurationSetResponse>>
+```
+
+## `email.updateDedicatedIP`
+
+Update a dedicated IP
+
+`PATCH /v1/dedicated-ips/{dedicated_ip_id}`
+
+```ts
+updateDedicatedIP(dedicated_ip_id: string, body: UpdateDedicatedIPBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateDedicatedIPResponse>>
+```
+
+## `email.updateIPPool`
+
+Update an IP pool
+
+`PATCH /v1/ip-pools/{ip_pool_id}`
+
+```ts
+updateIPPool(ip_pool_id: string, body: UpdateIPPoolBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateIPPoolResponse>>
+```
+
+## `email.updateIdentity`
+
+Update identity
+
+`PATCH /v1/identities/{identity_id}`
+
+```ts
+updateIdentity(identity_id: string, body: UpdateIdentityBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateIdentityResponse>>
+```
+
+## `email.updateReceivingConfiguration`
+
+Update receiving configuration
+
+`PATCH /v1/identities/{identity_id}/receiving`
+
+```ts
+updateReceivingConfiguration(identity_id: string, body: UpdateReceivingConfigurationBody, options: RequestOptions = {}): Promise<void>
+```
+
+## `email.updateRecipientRule`
+
+Update recipient rule
+
+`PATCH /v1/identities/{identity_id}/recipient-rules/{rule_id}`
+
+```ts
+updateRecipientRule(identity_id: string, rule_id: string, body: UpdateRecipientRuleBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateRecipientRuleResponse>>
+```
+
+## `email.updateSuppression`
+
+Update suppression
+
+`PATCH /v1/suppressions/{suppression_id}`
+
+```ts
+updateSuppression(suppression_id: string, body: UpdateSuppressionBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateSuppressionResponse>>
+```
+
+## `email.updateTemplate`
+
+Update a template
+
+`PATCH /v1/templates/{template_id}`
+
+```ts
+updateTemplate(template_id: string, body: UpdateTemplateBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateTemplateResponse>>
+```
+
+## `email.verifyBIMI`
+
+Verify BIMI logo (+ optional VMC)
+
+`POST /v1/identities/{identity_id}/bimi/verify`
+
+```ts
+verifyBIMI(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<VerifyBIMIResponse>>
+```
+
+## `email.verifyIdentity`
+
+Trigger DNS verification
+
+`POST /v1/identities/{identity_id}/verify`
+
+```ts
+verifyIdentity(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<VerifyIdentityResponse>>
+```
+
+## `email.verifyMailFromDomain`
+
+Verify custom MAIL FROM domain MX
+
+`POST /v1/identities/{identity_id}/mail-from-domain/verify`
+
+```ts
+verifyMailFromDomain(identity_id: string, options: RequestOptions = {}): Promise<ApiResponse<VerifyMailFromDomainResponse>>
+```
+
 ## `iam.assumeRole`
 
 Assume role
@@ -833,16 +1453,6 @@ Attach policy to service account
 
 ```ts
 attachServiceAccountPolicy(service_account_id: string, body: AttachServiceAccountPolicyBody, options: RequestOptions = {}): Promise<void>
-```
-
-## `iam.authorizeOAuthClient`
-
-Approve a CLI login and issue an authorization code
-
-`POST /v1/oauth/authorize`
-
-```ts
-authorizeOAuthClient(body: AuthorizeOAuthClientBody, options: RequestOptions = {}): Promise<ApiResponse<AuthorizeOAuthClientResponse>>
 ```
 
 ## `iam.createOIDCProvider`
@@ -2645,6 +3255,356 @@ Update VPC
 updateVpc(vpc_id: string, body: UpdateVpcBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateVpcResponse>>
 ```
 
+## `notifications.createTopic`
+
+Create a topic
+
+`POST /v1/topics`
+
+```ts
+createTopic(body: CreateTopicBody, options: RequestOptions = {}): Promise<ApiResponse<CreateTopicResponse>>
+```
+
+## `notifications.deleteTopic`
+
+Delete a topic
+
+`DELETE /v1/topics/{topic_id}`
+
+```ts
+deleteTopic(topic_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `notifications.deleteTopicPolicy`
+
+Delete the topic's resource policy
+
+`DELETE /v1/topics/{topic_id}/policy`
+
+```ts
+deleteTopicPolicy(topic_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `notifications.describeMessage`
+
+Describe a published notification
+
+`GET /v1/topics/{topic_id}/messages/{message_id}`
+
+```ts
+describeMessage(topic_id: string, message_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeMessageResponse>>
+```
+
+## `notifications.describeSubscription`
+
+Describe a subscription
+
+`GET /v1/topics/{topic_id}/subscriptions/{subscription_id}`
+
+```ts
+describeSubscription(topic_id: string, subscription_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeSubscriptionResponse>>
+```
+
+## `notifications.describeTopic`
+
+Describe a topic
+
+`GET /v1/topics/{topic_id}`
+
+```ts
+describeTopic(topic_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeTopicResponse>>
+```
+
+## `notifications.getSubscriptionSigningSecret`
+
+Read the webhook signing secret
+
+`GET /v1/topics/{topic_id}/subscriptions/{subscription_id}/signing-secret`
+
+```ts
+getSubscriptionSigningSecret(topic_id: string, subscription_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetSubscriptionSigningSecretResponse>>
+```
+
+## `notifications.getTopicPolicy`
+
+Read the topic's resource policy
+
+`GET /v1/topics/{topic_id}/policy`
+
+```ts
+getTopicPolicy(topic_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetTopicPolicyResponse>>
+```
+
+## `notifications.listDeliveries`
+
+List delivery records
+
+`GET /v1/topics/{topic_id}/deliveries`
+
+```ts
+listDeliveries(topic_id: string, query: ListDeliveriesQuery = {}, options: RequestOptions = {}): Promise<Page<ListDeliveriesResponse, ListDeliveriesItem>>
+```
+
+## `notifications.listMessages`
+
+List messages
+
+`GET /v1/topics/{topic_id}/messages`
+
+```ts
+listMessages(topic_id: string, query: ListMessagesQuery = {}, options: RequestOptions = {}): Promise<Page<ListMessagesResponse, ListMessagesItem>>
+```
+
+## `notifications.listSubscriptions`
+
+List subscriptions
+
+`GET /v1/topics/{topic_id}/subscriptions`
+
+```ts
+listSubscriptions(topic_id: string, query: ListSubscriptionsQuery = {}, options: RequestOptions = {}): Promise<Page<ListSubscriptionsResponse, ListSubscriptionsItem>>
+```
+
+## `notifications.listTopics`
+
+List topics
+
+`GET /v1/topics`
+
+```ts
+listTopics(query: ListTopicsQuery = {}, options: RequestOptions = {}): Promise<Page<ListTopicsResponse, ListTopicsItem>>
+```
+
+## `notifications.publish`
+
+Publish a notification
+
+`POST /v1/topics/{topic_id}/publish`
+
+```ts
+publish(topic_id: string, body: PublishBody, options: RequestOptions = {}): Promise<ApiResponse<PublishResponse>>
+```
+
+## `notifications.publishBatch`
+
+Publish up to 10 notifications
+
+`POST /v1/topics/{topic_id}/publish-batch`
+
+```ts
+publishBatch(topic_id: string, body: PublishBatchBody, options: RequestOptions = {}): Promise<ApiResponse<PublishBatchResponse>>
+```
+
+## `notifications.putTopicPolicy`
+
+Set the topic's resource policy
+
+`PUT /v1/topics/{topic_id}/policy`
+
+```ts
+putTopicPolicy(topic_id: string, body: PutTopicPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<PutTopicPolicyResponse>>
+```
+
+## `notifications.resendConfirmation`
+
+Re-send the confirmation handshake
+
+`POST /v1/topics/{topic_id}/subscriptions/{subscription_id}/resend-confirmation`
+
+```ts
+resendConfirmation(topic_id: string, subscription_id: string, options: RequestOptions = {}): Promise<ApiResponse<ResendConfirmationResponse>>
+```
+
+## `notifications.rotateSubscriptionSigningSecret`
+
+Rotate the webhook signing secret
+
+`POST /v1/topics/{topic_id}/subscriptions/{subscription_id}/signing-secret/rotate`
+
+```ts
+rotateSubscriptionSigningSecret(topic_id: string, subscription_id: string, options: RequestOptions = {}): Promise<ApiResponse<RotateSubscriptionSigningSecretResponse>>
+```
+
+## `notifications.subscribe`
+
+Subscribe an endpoint to a topic
+
+`POST /v1/topics/{topic_id}/subscriptions`
+
+```ts
+subscribe(topic_id: string, body: SubscribeBody, options: RequestOptions = {}): Promise<ApiResponse<SubscribeResponse>>
+```
+
+## `notifications.unsubscribe`
+
+Unsubscribe
+
+`DELETE /v1/topics/{topic_id}/subscriptions/{subscription_id}`
+
+```ts
+unsubscribe(topic_id: string, subscription_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `notifications.updateSubscription`
+
+Update mutable subscription settings
+
+`PATCH /v1/topics/{topic_id}/subscriptions/{subscription_id}`
+
+```ts
+updateSubscription(topic_id: string, subscription_id: string, body: UpdateSubscriptionBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateSubscriptionResponse>>
+```
+
+## `notifications.updateTopic`
+
+Update mutable topic metadata
+
+`PATCH /v1/topics/{topic_id}`
+
+```ts
+updateTopic(topic_id: string, body: UpdateTopicBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateTopicResponse>>
+```
+
+## `queue.changeMessageVisibility`
+
+Extend or shorten a lease
+
+`POST /v1/queues/{queue_id}/messages/visibility`
+
+```ts
+changeMessageVisibility(queue_id: string, body: ChangeMessageVisibilityBody, options: RequestOptions = {}): Promise<void>
+```
+
+## `queue.changeMessageVisibilityBatch`
+
+Extend or shorten up to ten leases
+
+`POST /v1/queues/{queue_id}/messages/visibility-batch`
+
+```ts
+changeMessageVisibilityBatch(queue_id: string, body: ChangeMessageVisibilityBatchBody, options: RequestOptions = {}): Promise<ApiResponse<ChangeMessageVisibilityBatchResponse>>
+```
+
+## `queue.createQueue`
+
+Create a queue
+
+`POST /v1/queues`
+
+```ts
+createQueue(body: CreateQueueBody, options: RequestOptions = {}): Promise<ApiResponse<CreateQueueResponse>>
+```
+
+## `queue.deleteMessage`
+
+Delete a leased message
+
+`DELETE /v1/queues/{queue_id}/messages`
+
+```ts
+deleteMessage(queue_id: string, query: DeleteMessageQuery, options: RequestOptions = {}): Promise<void>
+```
+
+## `queue.deleteMessageBatch`
+
+Delete up to ten leased messages
+
+`POST /v1/queues/{queue_id}/messages/delete-batch`
+
+```ts
+deleteMessageBatch(queue_id: string, body: DeleteMessageBatchBody, options: RequestOptions = {}): Promise<ApiResponse<DeleteMessageBatchResponse>>
+```
+
+## `queue.deleteQueue`
+
+Delete a queue
+
+`DELETE /v1/queues/{queue_id}`
+
+```ts
+deleteQueue(queue_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `queue.describeQueue`
+
+Describe a queue
+
+`GET /v1/queues/{queue_id}`
+
+```ts
+describeQueue(queue_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeQueueResponse>>
+```
+
+## `queue.listQueues`
+
+List queues
+
+`GET /v1/queues`
+
+```ts
+listQueues(query: ListQueuesQuery = {}, options: RequestOptions = {}): Promise<Page<ListQueuesResponse, ListQueuesItem>>
+```
+
+## `queue.peekMessages`
+
+Peek at a queue's messages
+
+`GET /v1/queues/{queue_id}/messages`
+
+```ts
+peekMessages(queue_id: string, query: PeekMessagesQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<PeekMessagesResponse>>
+```
+
+## `queue.purgeQueue`
+
+Delete every message on a queue
+
+`POST /v1/queues/{queue_id}/purge`
+
+```ts
+purgeQueue(queue_id: string, options: RequestOptions = {}): Promise<ApiResponse<PurgeQueueResponse>>
+```
+
+## `queue.receiveMessages`
+
+Lease messages
+
+`POST /v1/queues/{queue_id}/messages/receive`
+
+```ts
+receiveMessages(queue_id: string, body: ReceiveMessagesBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<ReceiveMessagesResponse>>
+```
+
+## `queue.sendMessage`
+
+Send a message
+
+`POST /v1/queues/{queue_id}/messages`
+
+```ts
+sendMessage(queue_id: string, body: SendMessageBody, options: RequestOptions = {}): Promise<ApiResponse<SendMessageResponse>>
+```
+
+## `queue.sendMessageBatch`
+
+Send up to ten messages
+
+`POST /v1/queues/{queue_id}/messages/batch`
+
+```ts
+sendMessageBatch(queue_id: string, body: SendMessageBatchBody, options: RequestOptions = {}): Promise<ApiResponse<SendMessageBatchResponse>>
+```
+
+## `queue.updateQueue`
+
+Update queue attributes
+
+`PATCH /v1/queues/{queue_id}`
+
+```ts
+updateQueue(queue_id: string, body: UpdateQueueBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateQueueResponse>>
+```
+
 ## `quota.listQuotas`
 
 List quotas
@@ -2653,6 +3613,266 @@ List quotas
 
 ```ts
 listQuotas(query: ListQuotasQuery = {}, options: RequestOptions = {}): Promise<Page<ListQuotasResponse, ListQuotasItem>>
+```
+
+## `registry.batchDeleteImage`
+
+Delete images
+
+`POST /v1/repositories/{repository_id}/images/batch-delete`
+
+```ts
+batchDeleteImage(repository_id: string, body: BatchDeleteImageBody, options: RequestOptions = {}): Promise<ApiResponse<BatchDeleteImageResponse>>
+```
+
+## `registry.createPullThroughCacheRule`
+
+Create a pull-through cache rule
+
+`POST /v1/pull-through-cache-rules`
+
+```ts
+createPullThroughCacheRule(body: CreatePullThroughCacheRuleBody, options: RequestOptions = {}): Promise<ApiResponse<CreatePullThroughCacheRuleResponse>>
+```
+
+## `registry.createRepository`
+
+Create a repository
+
+`POST /v1/repositories`
+
+```ts
+createRepository(body: CreateRepositoryBody, options: RequestOptions = {}): Promise<ApiResponse<CreateRepositoryResponse>>
+```
+
+## `registry.deleteEncryptionConfiguration`
+
+Delete encryption configuration
+
+`DELETE /v1/encryption-configuration`
+
+```ts
+deleteEncryptionConfiguration(options: RequestOptions = {}): Promise<void>
+```
+
+## `registry.deleteLifecyclePolicy`
+
+Delete the lifecycle policy
+
+`DELETE /v1/repositories/{repository_id}/lifecycle-policy`
+
+```ts
+deleteLifecyclePolicy(repository_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `registry.deletePullThroughCacheRule`
+
+Delete a pull-through cache rule
+
+`DELETE /v1/pull-through-cache-rules/{prefix}`
+
+```ts
+deletePullThroughCacheRule(prefix: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `registry.deleteRepository`
+
+Delete a repository
+
+`DELETE /v1/repositories/{repository_id}`
+
+```ts
+deleteRepository(repository_id: string, query: DeleteRepositoryQuery = {}, options: RequestOptions = {}): Promise<void>
+```
+
+## `registry.deleteRepositoryPolicy`
+
+Delete the repository policy
+
+`DELETE /v1/repositories/{repository_id}/policy`
+
+```ts
+deleteRepositoryPolicy(repository_id: string, options: RequestOptions = {}): Promise<void>
+```
+
+## `registry.describeImage`
+
+Describe an image
+
+`GET /v1/repositories/{repository_id}/images/{image_reference}`
+
+```ts
+describeImage(repository_id: string, image_reference: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeImageResponse>>
+```
+
+## `registry.describeImages`
+
+List images
+
+`GET /v1/repositories/{repository_id}/images`
+
+```ts
+describeImages(repository_id: string, query: DescribeImagesQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<DescribeImagesResponse>>
+```
+
+## `registry.describePullThroughCacheRule`
+
+Get a pull-through cache rule
+
+`GET /v1/pull-through-cache-rules/{prefix}`
+
+```ts
+describePullThroughCacheRule(prefix: string, options: RequestOptions = {}): Promise<ApiResponse<DescribePullThroughCacheRuleResponse>>
+```
+
+## `registry.describePullThroughCacheRules`
+
+List pull-through cache rules
+
+`GET /v1/pull-through-cache-rules`
+
+```ts
+describePullThroughCacheRules(query: DescribePullThroughCacheRulesQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<DescribePullThroughCacheRulesResponse>>
+```
+
+## `registry.describeRepositories`
+
+List repositories
+
+`GET /v1/repositories`
+
+```ts
+describeRepositories(query: DescribeRepositoriesQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<DescribeRepositoriesResponse>>
+```
+
+## `registry.describeRepository`
+
+Describe a repository
+
+`GET /v1/repositories/{repository_id}`
+
+```ts
+describeRepository(repository_id: string, options: RequestOptions = {}): Promise<ApiResponse<DescribeRepositoryResponse>>
+```
+
+## `registry.getAuthorizationToken`
+
+Get a docker login credential
+
+`POST /v1/authorization-token`
+
+```ts
+getAuthorizationToken(options: RequestOptions = {}): Promise<ApiResponse<GetAuthorizationTokenResponse>>
+```
+
+## `registry.getEncryptionConfiguration`
+
+Get the encryption configuration
+
+`GET /v1/encryption-configuration`
+
+```ts
+getEncryptionConfiguration(options: RequestOptions = {}): Promise<ApiResponse<GetEncryptionConfigurationResponse>>
+```
+
+## `registry.getLifecyclePolicy`
+
+Get the lifecycle policy
+
+`GET /v1/repositories/{repository_id}/lifecycle-policy`
+
+```ts
+getLifecyclePolicy(repository_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetLifecyclePolicyResponse>>
+```
+
+## `registry.getRepositoryPolicy`
+
+Get the repository policy
+
+`GET /v1/repositories/{repository_id}/policy`
+
+```ts
+getRepositoryPolicy(repository_id: string, options: RequestOptions = {}): Promise<ApiResponse<GetRepositoryPolicyResponse>>
+```
+
+## `registry.getRetainedRegistryPresence`
+
+Check retained registry data presence
+
+`GET /v1/encryption-configuration/retained-data`
+
+```ts
+getRetainedRegistryPresence(options: RequestOptions = {}): Promise<ApiResponse<GetRetainedRegistryPresenceResponse>>
+```
+
+## `registry.listTags`
+
+List tags
+
+`GET /v1/repositories/{repository_id}/tags`
+
+```ts
+listTags(repository_id: string, query: ListTagsQuery = {}, options: RequestOptions = {}): Promise<Page<ListTagsResponse, ListTagsItem>>
+```
+
+## `registry.putEncryptionConfiguration`
+
+Set the encryption configuration
+
+`PUT /v1/encryption-configuration`
+
+```ts
+putEncryptionConfiguration(body: PutEncryptionConfigurationBody, options: RequestOptions = {}): Promise<ApiResponse<PutEncryptionConfigurationResponse>>
+```
+
+## `registry.putLifecyclePolicy`
+
+Set the lifecycle policy
+
+`PUT /v1/repositories/{repository_id}/lifecycle-policy`
+
+```ts
+putLifecyclePolicy(repository_id: string, body: PutLifecyclePolicyBody, options: RequestOptions = {}): Promise<ApiResponse<PutLifecyclePolicyResponse>>
+```
+
+## `registry.setRepositoryPolicy`
+
+Set the repository policy
+
+`PUT /v1/repositories/{repository_id}/policy`
+
+```ts
+setRepositoryPolicy(repository_id: string, body: SetRepositoryPolicyBody, options: RequestOptions = {}): Promise<ApiResponse<SetRepositoryPolicyResponse>>
+```
+
+## `registry.startLifecyclePolicyPreview`
+
+Preview a lifecycle policy
+
+`POST /v1/repositories/{repository_id}/lifecycle-policy/preview`
+
+```ts
+startLifecyclePolicyPreview(repository_id: string, body: StartLifecyclePolicyPreviewBody | undefined = undefined, options: RequestOptions = {}): Promise<ApiResponse<StartLifecyclePolicyPreviewResponse>>
+```
+
+## `registry.updatePullThroughCacheRule`
+
+Update a pull-through cache rule
+
+`PATCH /v1/pull-through-cache-rules/{prefix}`
+
+```ts
+updatePullThroughCacheRule(prefix: string, body: UpdatePullThroughCacheRuleBody, options: RequestOptions = {}): Promise<ApiResponse<UpdatePullThroughCacheRuleResponse>>
+```
+
+## `registry.updateRepository`
+
+Update repository settings
+
+`PATCH /v1/repositories/{repository_id}`
+
+```ts
+updateRepository(repository_id: string, body: UpdateRepositoryBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateRepositoryResponse>>
 ```
 
 ## `secrets.createSecret`
@@ -3305,6 +4525,16 @@ Upload a part
 uploadPart(bucket: string, upload_id: string, part_number: string, body: UploadPartBody, options: RequestOptions = {}): Promise<ApiResponse<UploadPartResponse>>
 ```
 
+## `telemetry.createAlert`
+
+Create a metric alert
+
+`POST /v1/alerts`
+
+```ts
+createAlert(body: CreateAlertBody, options: RequestOptions = {}): Promise<ApiResponse<CreateAlertResponse>>
+```
+
 ## `telemetry.createLogGroup`
 
 Create a log group
@@ -3313,6 +4543,16 @@ Create a log group
 
 ```ts
 createLogGroup(body: CreateLogGroupBody, options: RequestOptions = {}): Promise<ApiResponse<CreateLogGroupResponse>>
+```
+
+## `telemetry.deleteAlert`
+
+Delete a metric alert
+
+`DELETE /v1/alerts/{id}`
+
+```ts
+deleteAlert(id: string, options: RequestOptions = {}): Promise<void>
 ```
 
 ## `telemetry.deleteLogGroup`
@@ -3333,6 +4573,16 @@ Delete trace settings
 
 ```ts
 deleteTraceSettings(options: RequestOptions = {}): Promise<void>
+```
+
+## `telemetry.getAlert`
+
+Get a metric alert
+
+`GET /v1/alerts/{id}`
+
+```ts
+getAlert(id: string, options: RequestOptions = {}): Promise<ApiResponse<GetAlertResponse>>
 ```
 
 ## `telemetry.getLog`
@@ -3403,6 +4653,16 @@ Ingest a batch of trace spans
 
 ```ts
 ingestSpans(body: IngestSpansBody, options: RequestOptions = {}): Promise<ApiResponse<IngestSpansResponse>>
+```
+
+## `telemetry.listAlerts`
+
+List metric alerts
+
+`GET /v1/alerts`
+
+```ts
+listAlerts(query: ListAlertsQuery = {}, options: RequestOptions = {}): Promise<Page<ListAlertsResponse, ListAlertsItem>>
 ```
 
 ## `telemetry.listLogGroups`
@@ -3523,6 +4783,16 @@ List traces
 
 ```ts
 searchTraces(query: SearchTracesQuery, options: RequestOptions = {}): Promise<ApiResponse<SearchTracesResponse>>
+```
+
+## `telemetry.updateAlert`
+
+Update a metric alert
+
+`PATCH /v1/alerts/{id}`
+
+```ts
+updateAlert(id: string, body: UpdateAlertBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateAlertResponse>>
 ```
 
 ## `telemetry.updateLogGroup`

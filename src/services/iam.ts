@@ -10,8 +10,6 @@ export type AssumeRoleWithWebIdentityBody =
 export type AssumeRoleWithWebIdentityResponse = AssumeRoleResponse2;
 export type AttachRolePolicyBody = RolePolicyAttachRequestInput;
 export type AttachServiceAccountPolicyBody = PolicyAttachRequestInput;
-export type AuthorizeOAuthClientBody = OAuthAuthorizeRequestInput;
-export type AuthorizeOAuthClientResponse = OAuthAuthorizeResponse;
 export type CreateOIDCProviderBody = OIDCProviderCreateRequestInput;
 export type CreateOIDCProviderResponse = OIDCProviderResponse;
 export type CreatePersonalSSHKeyBody = SSHKeyCreateRequestInput;
@@ -187,20 +185,6 @@ export type AssumeRoleWithWebIdentityRequestInput = {
 export type RolePolicyAttachRequestInput = { policy: PolicyReferenceInput };
 export type PolicyReferenceInput = string;
 export type PolicyAttachRequestInput = { policy: PolicyReferenceInput };
-export type OAuthAuthorizeRequestInput = {
-  client_id: string;
-  redirect_uri: string;
-  code_challenge: string;
-  code_challenge_method: "S256";
-  state?: string;
-  organization: OrganizationReferenceInput;
-};
-export type OrganizationReferenceInput = string;
-export type OAuthAuthorizeResponse = {
-  code?: string;
-  redirect_to?: string;
-  expires_in: number;
-};
 export type OIDCProviderCreateRequestInput = {
   name: string;
   description?: string;
@@ -533,18 +517,6 @@ const operations = {
     id: "attachServiceAccountPolicy",
     method: "POST",
     path: "/v1/service-accounts/{service_account_id}/policies",
-    authenticated: true,
-    requiredQuery: [],
-    requiredHeaders: [],
-    queryEncoding: {},
-    bodyRequired: true,
-    contentType: "application/json",
-    accept: "application/json",
-  },
-  authorizeOAuthClient: {
-    id: "authorizeOAuthClient",
-    method: "POST",
-    path: "/v1/oauth/authorize",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -1353,21 +1325,6 @@ export class IamService {
       "https://iam.basaltic.sh",
       operations.attachServiceAccountPolicy,
       { service_account_id },
-      body,
-      {},
-      options,
-    );
-  }
-  /** Approve a CLI login and issue an authorization code */
-  authorizeOAuthClient(
-    body: AuthorizeOAuthClientBody,
-    options: RequestOptions = {},
-  ): Promise<ApiResponse<AuthorizeOAuthClientResponse>> {
-    return this.transport.json<AuthorizeOAuthClientResponse>(
-      "iam",
-      "https://iam.basaltic.sh",
-      operations.authorizeOAuthClient,
-      {},
       body,
       {},
       options,
