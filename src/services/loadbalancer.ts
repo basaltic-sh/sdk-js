@@ -203,7 +203,8 @@ export type AutoscalingStatus = {
     | "metrics_unavailable"
     | "stabilizing"
     | "cooldown"
-    | "draining";
+    | "draining"
+    | "scale_in_blocked";
   reason: string;
   evaluated_at?: string;
   last_scaled_at?: string;
