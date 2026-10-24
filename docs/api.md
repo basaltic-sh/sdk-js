@@ -605,6 +605,16 @@ Update an instance pool's description, size, tags or launch template
 updateInstancePool(pool_id: string, body: UpdateInstancePoolBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateInstancePoolResponse>>
 ```
 
+## `compute.updateInstancePoolMemberProtection`
+
+Update member scale-in protection
+
+`PATCH /v1/instance-pools/{pool_id}/instances/{instance_id}`
+
+```ts
+updateInstancePoolMemberProtection(pool_id: string, instance_id: string, body: UpdateInstancePoolMemberProtectionBody, options: RequestOptions = {}): Promise<ApiResponse<UpdateInstancePoolMemberProtectionResponse>>
+```
+
 ## `compute.updateInstanceVolumeAttachment`
 
 Update a volume attachment's settings
@@ -3612,7 +3622,7 @@ List quotas
 `GET /v1/quotas`
 
 ```ts
-listQuotas(query: ListQuotasQuery = {}, options: RequestOptions = {}): Promise<Page<ListQuotasResponse, ListQuotasItem>>
+listQuotas(query: ListQuotasQuery = {}, options: RequestOptions = {}): Promise<ApiResponse<ListQuotasResponse>>
 ```
 
 ## `registry.batchDeleteImage`

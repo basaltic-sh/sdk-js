@@ -1,11 +1,13 @@
 // Generated from the Basaltic API definitions. Do not edit.
 import type { Transport, Operation } from "../transport.js";
 import type { RequestOptions } from "../config.js";
-import type { Page } from "../response.js";
+import type { ApiResponse } from "../response.js";
 export type ListQuotasQuery = { region?: string };
 export type ListQuotasResponse = QuotaListResponse;
-export type ListQuotasItem = QuotaItem;
-export type QuotaListResponse = { quotas: QuotaItem[] };
+export type QuotaListResponse = {
+  quotas: QuotaItem[];
+  policies?: QuotaPolicy[];
+};
 export type QuotaItem = {
   service: string;
   resource_type: string;
@@ -15,6 +17,21 @@ export type QuotaItem = {
   reserved: number;
   available: number;
   is_default: boolean;
+  description: string;
+};
+export type QuotaPolicy = {
+  service: "email";
+  resource_type:
+    | "message_size_bytes"
+    | "sent_recipients_per_second"
+    | "sent_recipients_per_day"
+    | "received_recipients_per_second";
+  scope: "regional";
+  region: string;
+  limit: number;
+  unit: "bytes" | "recipients";
+  window_seconds?: 1 | 86400;
+  limit_source: "default" | "organization" | "region";
   description: string;
 };
 const operations = {
@@ -29,7 +46,6 @@ const operations = {
     bodyRequired: false,
     contentType: "",
     accept: "application/json",
-    itemsKey: "quotas",
   },
 } as const satisfies Record<string, Operation>;
 export class QuotaService {
@@ -38,8 +54,8 @@ export class QuotaService {
   listQuotas(
     query: ListQuotasQuery = {},
     options: RequestOptions = {},
-  ): Promise<Page<ListQuotasResponse, ListQuotasItem>> {
-    return this.transport.page<ListQuotasResponse, ListQuotasItem>(
+  ): Promise<ApiResponse<ListQuotasResponse>> {
+    return this.transport.json<ListQuotasResponse>(
       "quota",
       "https://quota.basaltic.sh",
       operations.listQuotas,

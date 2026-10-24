@@ -122,6 +122,9 @@ export type UpdateInstanceBody = InstanceUpdateRequestInput;
 export type UpdateInstanceResponse = { instance: Instance };
 export type UpdateInstancePoolBody = InstancePoolUpdateRequestInput;
 export type UpdateInstancePoolResponse = InstancePoolResponse;
+export type UpdateInstancePoolMemberProtectionBody =
+  InstancePoolMemberProtectionRequestInput;
+export type UpdateInstancePoolMemberProtectionResponse = InstancePoolResponse;
 export type UpdateInstanceVolumeAttachmentBody = {
   delete_on_termination: boolean;
 };
@@ -450,6 +453,8 @@ export type InstancePool = {
   autoscaling?: AutoscalingPolicy;
   autoscaling_status?: AutoscalingStatus;
   rollout_surge?: boolean;
+  scale_in_protected_instances?: string[];
+  scale_in_blocked_reason?: string;
   retiring_instances?: RetiringPoolMember[];
   id?: string;
   crn?: string;
@@ -632,6 +637,7 @@ export type InstanceUpdateRequestInput = {
   tags?: TagsInput;
 };
 export type InstancePoolUpdateRequestInput = {
+  scale_in_instances?: string[];
   subnets?: string[];
   autoscaling?: AutoscalingPolicyInput;
   description?: string;
@@ -640,6 +646,9 @@ export type InstancePoolUpdateRequestInput = {
   min_count?: number;
   max_count?: number;
   template?: InstancePoolTemplateRequestInput;
+};
+export type InstancePoolMemberProtectionRequestInput = {
+  scale_in_protected: boolean;
 };
 const operations = {
   attachInstanceInterface: {
@@ -1150,6 +1159,18 @@ const operations = {
     id: "updateInstancePool",
     method: "PATCH",
     path: "/v1/instance-pools/{pool_id}",
+    authenticated: true,
+    requiredQuery: [],
+    requiredHeaders: [],
+    queryEncoding: {},
+    bodyRequired: true,
+    contentType: "application/json",
+    accept: "application/json",
+  },
+  updateInstancePoolMemberProtection: {
+    id: "updateInstancePoolMemberProtection",
+    method: "PATCH",
+    path: "/v1/instance-pools/{pool_id}/instances/{instance_id}",
     authenticated: true,
     requiredQuery: [],
     requiredHeaders: [],
@@ -1899,6 +1920,23 @@ export class ComputeService {
       "https://compute.{region}.basaltic.sh",
       operations.updateInstancePool,
       { pool_id },
+      body,
+      {},
+      options,
+    );
+  }
+  /** Update member scale-in protection */
+  updateInstancePoolMemberProtection(
+    pool_id: string,
+    instance_id: string,
+    body: UpdateInstancePoolMemberProtectionBody,
+    options: RequestOptions = {},
+  ): Promise<ApiResponse<UpdateInstancePoolMemberProtectionResponse>> {
+    return this.transport.json<UpdateInstancePoolMemberProtectionResponse>(
+      "compute",
+      "https://compute.{region}.basaltic.sh",
+      operations.updateInstancePoolMemberProtection,
+      { pool_id, instance_id },
       body,
       {},
       options,
